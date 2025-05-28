@@ -9,7 +9,18 @@ version = mod_version
 group = mod_group_id
 
 repositories {
-    mavenLocal()
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    // define the local folder to search
+    // (this directory is relative to the project's root)
+    flatDir { dir 'libs' }
+
 }
 
 base {
@@ -96,6 +107,15 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
 dependencies {
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    // Add the DH Api for compile time development
+    compileOnly "blank:DistantHorizonsApi:4.0.0"
+    //compileOnly fg.deobf("blank:DistantHorizonsAPI:1.0.0") // local Jar file, file should be named in the format: "DistantHorizonsAPI-VERSION.jar" (IE "DistantHorizonsAPI-1.0.0.jar") or "DistantHorizonsAPI.jar"
+
+    // Add the Full DH mod for runtime use
+    runtimeOnly "blank:DistantHorizons:2.3.2"
+
     // Example mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
