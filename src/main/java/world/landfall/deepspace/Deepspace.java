@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+
 import world.landfall.deepspace.dimension.SpaceDimensionType;
 
 import java.util.Objects;
@@ -107,6 +108,7 @@ public class Deepspace {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
+            // Initialize client events
             LOGGER.info("Deep Space mod client initialized");
         }
     }
