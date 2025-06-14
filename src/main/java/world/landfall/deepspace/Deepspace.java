@@ -1,19 +1,10 @@
 package world.landfall.deepspace;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -26,13 +17,13 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+import world.landfall.deepspace.dimension.SpaceDimensionType;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
+import java.util.Objects;
+
 @Mod(Deepspace.MODID)
 public class Deepspace {
     // Define mod id in a common place for everything to reference
@@ -41,13 +32,23 @@ public class Deepspace {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
-
-
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
-    public Deepspace(IEventBus modEventBus, ModContainer modContainer) {
-        // Register the commonSetup method for modloading
+    public Deepspace(@NotNull IEventBus modEventBus, @NotNull ModContainer modContainer) {
+        Objects.requireNonNull(modEventBus, "modEventBus cannot be null");
+        Objects.requireNonNull(modContainer, "modContainer cannot be null");
+
+        // Register setup methods
         modEventBus.addListener(this::commonSetup);
+        
+        // Register dimension
+        try {
+            SpaceDimensionType.register(modEventBus);
+            LOGGER.info("Space dimension registered successfully");
+        } catch (Exception e) {
+            LOGGER.error("Failed to register space dimension", e);
+            throw new RuntimeException("Failed to initialize mod", e);
+        }
 
         // Register the Deferred Register to the mod event bus so blocks get registered
         ModBlocks.register(modEventBus);
@@ -67,11 +68,17 @@ public class Deepspace {
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        
+        LOGGER.info("Deep Space mod initialized successfully");
     }
 
+    /**
+     * Handles common setup tasks for both client and server.
+     *
+     * @param event The common setup event
+     */
     private void commonSetup(final FMLCommonSetupEvent event) {
-        // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
+        LOGGER.info("Performing common setup for Deep Space");
 
         if (Config.logDirtBlock) LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
 
@@ -85,11 +92,14 @@ public class Deepspace {
 
     }
 
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
+    /**
+     * Handles server startup events.
+     *
+     * @param event The server starting event
+     */
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
+        LOGGER.info("Deep Space mod server components initialized");
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
@@ -97,9 +107,7 @@ public class Deepspace {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            // Some client setup code
-            LOGGER.info("HELLO FROM CLIENT SETUP");
-            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+            LOGGER.info("Deep Space mod client initialized");
         }
     }
 }
