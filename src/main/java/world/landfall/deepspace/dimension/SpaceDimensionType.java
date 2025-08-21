@@ -38,7 +38,7 @@ public final class SpaceDimensionType {
     /**
      * Handles the registration of the dimension type
      */
-    private static final DeferredRegister<DimensionType> DIMENSION_TYPES = DeferredRegister.create(Registries.DIMENSION_TYPE, Deepspace.MODID);
+    public static final DeferredRegister<DimensionType> DIMENSION_TYPES = DeferredRegister.create(Registries.DIMENSION_TYPE, Deepspace.MODID);
 
     /**
      * Registers the dimension type with the mod event bus.

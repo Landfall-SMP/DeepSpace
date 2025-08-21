@@ -10,13 +10,13 @@ group = mod_group_id
 
 repositories {
     maven {
+        name = 'BlameJared Maven (CrT / Bookshelf)'
+        url = 'https://maven.blamejared.com'
+    }
+    maven {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
     }
-
     // define the local folder to search
     // (this directory is relative to the project's root)
     flatDir { dir 'libs' }
@@ -83,7 +83,6 @@ neoForge {
             // "REGISTRIES": For firing of registry events.
             // "REGISTRYDUMP": For getting the contents of all registries.
             systemProperty 'forge.logging.markers', 'REGISTRIES'
-
             // Recommended logging level for the console
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
@@ -108,7 +107,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
+    implementation "foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}"
     // Add the DH Api for compile time development
     //compileOnly "blank:DistantHorizonsApi:4.0.0"
     //compileOnly fg.deobf("blank:DistantHorizonsAPI:1.0.0") // local Jar file, file should be named in the format: "DistantHorizonsAPI-VERSION.jar" (IE "DistantHorizonsAPI-1.0.0.jar") or "DistantHorizonsAPI.jar"
