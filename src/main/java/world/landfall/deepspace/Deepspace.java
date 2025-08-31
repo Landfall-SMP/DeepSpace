@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import world.landfall.deepspace.dimension.SpaceDimensionType;
+import world.landfall.deepspace.render.SpaceSkyRenderer;
 
 import java.util.Objects;
 
@@ -69,7 +70,9 @@ public class Deepspace {
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-        
+
+        SpaceSkyRenderer.init();
+
         LOGGER.info("Deep Space mod initialized successfully");
     }
 
