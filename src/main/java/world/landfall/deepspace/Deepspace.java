@@ -3,6 +3,7 @@ package world.landfall.deepspace;
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
@@ -81,6 +82,9 @@ public class Deepspace {
      *
      * @param event The common setup event
      */
+    protected ResourceLocation path(String s) {
+        return ResourceLocation.fromNamespaceAndPath(MODID,s);
+    }
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Performing common setup for Deep Space");
 

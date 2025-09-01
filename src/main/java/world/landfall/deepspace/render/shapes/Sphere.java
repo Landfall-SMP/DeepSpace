@@ -15,30 +15,31 @@ public class Sphere implements DeepSpaceRenderable {
     public Sphere(double radius, int width, int height) {
         triangles = new LinkedList<Triangle>();
         // Thanks to "bobobobo" on StackExchange for the algorithm
-        for (int h = -1; h <= height; h++) {
-            double phi1 = ((double)(h) / width)*Math.PI - Math.PI/2;
-            double phi2 = ((double)(h+1) / width)*Math.PI - Math.PI/2;
+        for (int h = 0; h < height*2; h++) {
+            double phi1 = ((double)(h) / height)*Math.PI - Math.PI/2;
+            double phi2 = ((double)(h+1) / height)*Math.PI - Math.PI/2;
             for (int w = 0; w < width*2; w++) {
-                double theta1 = ((double)(w) / height)*2*Math.PI - Math.PI;
-                double theta2 = ((double)(w+1) / height)*2*Math.PI - Math.PI;
-
+                double theta1 = ((double)(w) / width)*2*Math.PI - Math.PI;
+                double theta2 = ((double)(w+1) / width)*2*Math.PI - Math.PI;
+                double shiftAmount = (h == 0 || h == height-1 || h == height || h == height*2 - 1) ? .5 : 0;
+                //double shiftAmount = .5;
                 Vector3f vertex1 = vertexAtAngles(theta1, phi1, radius);
-                Vector2f uv1 = new Vector2f((float)(theta1/Math.PI), (float)(phi1/Math.PI/2));
+                Vector2f uv1 = new Vector2f((float)(w+shiftAmount - width/2.)/width*1f, (float)(h+0-height/2.)/(height+0)*1);
 
                 Vector3f vertex2 = vertexAtAngles(theta1, phi2, radius);
-                Vector2f uv2 = new Vector2f((float)(theta1/Math.PI), (float)(phi2/Math.PI/2));
+                Vector2f uv2 = new Vector2f((float)(w+shiftAmount - width/2.)/width*1f, (float)(h+1-height/2.)/(height+0)*1);
 
                 Vector3f vertex3 = vertexAtAngles(theta2, phi2, radius);
-                Vector2f uv3 = new Vector2f((float)(theta2/Math.PI), (float)(phi2/Math.PI/2));
+                Vector2f uv3 = new Vector2f((float)(w+1+shiftAmount - width/2.)/(width)*1f, (float)(h+1-height/2.)/(height+0)*1);
 
                 Vector3f vertex4 = vertexAtAngles(theta2, phi1, radius);
-                Vector2f uv4 = new Vector2f((float)(theta2/Math.PI), (float)(phi1/Math.PI/2));
+                Vector2f uv4 = new Vector2f((float)(w+1+shiftAmount - width/2.)/(width)*1f, (float)(h+0-height/2.)/(height+0)*1);
 
 
-                if (h == 0) {
+                if (h == height / 2) {
                     addTriangle(vertex1, vertex3, vertex4, uv1, uv3, uv4);
                 }
-                else if (h + 1 == height) {
+                else if (h + 1 == height / 2 & false) {
                     addTriangle(vertex3, vertex1, vertex2, uv3, uv1, uv2);
 
                 }
@@ -75,11 +76,11 @@ public class Sphere implements DeepSpaceRenderable {
                 var vertex = new Vector3f(oldVertex.x, oldVertex.y, oldVertex.z);
                 vertex.rotate(rotation);
                 var UV = triangle.UV[i];
-
+                var normal = new Vector3f(vertex).mul(1);
                 consumer.addVertex(vertex.x+dimensions.x(), vertex.y+dimensions.y(), vertex.z+dimensions.z(),
                         Color.WHITE.argb(),
                         UV.x, UV.y,
-                        0, 100, 0, 0, 0
+                        0, 255, normal.x, normal.y, normal.z
                 );
             }
         }
