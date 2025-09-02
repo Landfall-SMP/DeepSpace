@@ -73,6 +73,7 @@ public class SpaceSkyRenderer {
                     var poseStack = matrixStack.toPoseStack();
                     poseStack.pushPose();
                     skySphere.render(poseStack, builder, new Vector3f(), new Quaternionf().rotateLocalX(-(float)Math.PI/2));
+
                     renderType.draw(builder.buildOrThrow());
                     //VeilRenderType.endGateway().draw(builder.buildOrThrow());
                     bufferSource.endBatch(renderType);

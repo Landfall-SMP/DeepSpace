@@ -49,8 +49,6 @@ public class Sphere implements DeepSpaceRenderable {
                     addTriangle(vertex2, vertex3, vertex4, uv2, uv3, uv4);
 
                 }
-                System.out.println(w + " out of " + width + " width");
-                System.out.println(h + " out of " + width + " height");
             }
         }
     }

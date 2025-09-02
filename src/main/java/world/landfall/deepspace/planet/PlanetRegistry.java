@@ -363,9 +363,8 @@ public class PlanetRegistry {
             LOGGER.debug("Cleared all planets from registry");
         }
     }
-    
-    @SubscribeEvent
-    public static void onServerStarted(ServerStartedEvent event) {
+
+    public static void init() {
         // Initialize with server config directory
         Path serverConfigDir = Paths.get("config");
         initialize(serverConfigDir);
