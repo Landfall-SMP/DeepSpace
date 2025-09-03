@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -129,6 +130,21 @@ public class Planet {
         return position.x >= boundingBoxMin.x && position.x <= boundingBoxMax.x &&
                position.y >= boundingBoxMin.y && position.y <= boundingBoxMax.y &&
                position.z >= boundingBoxMin.z && position.z <= boundingBoxMax.z;
+    }
+
+    /**
+     * Checks if a player is touching the planet
+     *
+     * @param player The player to check
+     * @return true if the player is colliding with this planet, false otherwise
+     */
+    public boolean isPlayerTouching(@NotNull Player player) {
+        //return isWithinBounds(player.position()) || isWithinBounds(player.position().add(0, 2, 0));
+        Objects.requireNonNull(player);
+        var position = player.position();
+        return position.x >= boundingBoxMin.x - .5 && position.x <= boundingBoxMax.x + .5 &&
+               position.y >= boundingBoxMin.y - 2 && position.y <= boundingBoxMax.y &&
+               position.z >= boundingBoxMin.z - .5 && position.z <= boundingBoxMax.z + .5;
     }
 
     /**

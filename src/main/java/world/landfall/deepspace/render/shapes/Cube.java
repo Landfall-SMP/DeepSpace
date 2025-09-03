@@ -15,9 +15,22 @@ import java.util.LinkedList;
 public class Cube implements DeepSpaceRenderable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private LinkedList<Triangle> TRIANGLES = new LinkedList<>();
-    public Cube(Vector3f corner1, Vector3f corner2) {
-        Vector3f center = corner1.add(corner2).div(2);
-        Vector3f diff = corner1.sub(corner2).div(2);
+    public Cube(Vector3f _corner1, Vector3f _corner2) {
+        var corner1 = new Vector3f(
+                _corner1.x,
+                _corner1.y,
+                _corner1.z
+        );
+        var corner2 = new Vector3f(
+                _corner2.x,
+                _corner2.y,
+                _corner2.z
+        );
+        //corner1.mul(2);
+        //corner2.mul(2);
+        Vector3f center = new Vector3f(corner1).add(corner2).div(2);
+
+        Vector3f diff = new Vector3f(corner1).sub(corner2).div(2);
         Quaternionf[] rotations = new Quaternionf[] {
                 new Quaternionf(),
                 new Quaternionf().rotateLocalX((float)Math.PI/2),
@@ -31,15 +44,15 @@ public class Cube implements DeepSpaceRenderable {
                     new Vector3f(diff.x, diff.y, diff.z),
                     new Vector3f(diff.x, -diff.y, diff.z),
                     new Vector3f(-diff.x, diff.y, diff.z),
-                    new Vector3f(-diff.x, diff.y, diff.z),
                     new Vector3f(diff.x, -diff.y, diff.z),
+                    new Vector3f(-diff.x, diff.y, diff.z),
                     new Vector3f(-diff.x, -diff.y, diff.z)
             };
             var triangle1 = new Triangle(
                     new Vector3f[] {
-                            vertexes[0].rotate(x),
-                            vertexes[1].rotate(x),
-                            vertexes[2].rotate(x)
+                            vertexes[0].rotate(x).add(center),
+                            vertexes[1].rotate(x).add(center),
+                            vertexes[2].rotate(x).add(center)
                     },
                     new Vector2f[] {
                             new Vector2f(0, 0),
@@ -49,9 +62,9 @@ public class Cube implements DeepSpaceRenderable {
             );
             var triangle2 = new Triangle(
                     new Vector3f[] {
-                            vertexes[3].rotate(x),
-                            vertexes[4].rotate(x),
-                            vertexes[5].rotate(x)
+                            vertexes[4].rotate(x).add(center),
+                            vertexes[3].rotate(x).add(center),
+                            vertexes[5].rotate(x).add(center)
                     },
                     new Vector2f[] {
                             new Vector2f(1, 0),
@@ -72,7 +85,6 @@ public class Cube implements DeepSpaceRenderable {
                 var oldVertex = triangle.vertexes[i];
                 var vertex = new Vector3f(oldVertex.x, oldVertex.y, oldVertex.z);
                 vertex.rotate(rotation);
-                vertex.mul(2);
                 var UV = triangle.UV[i];
                 var normal = new Vector3f(vertex).mul(1);
                 consumer.addVertex(vertex.x+dimensions.x(), vertex.y+dimensions.y(), vertex.z+dimensions.z(),

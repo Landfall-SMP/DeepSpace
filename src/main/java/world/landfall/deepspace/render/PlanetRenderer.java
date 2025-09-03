@@ -56,6 +56,7 @@ public class PlanetRenderer {
     public static void init() {
         for (var x : PlanetRegistry.getAllPlanets()) {
             MESHES.put(x.getId(),new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f()));
+            TEXTURES.put(x.getId(), Deepspace.path("textures/"+x.getId()+".png"));
             logger.info("Made mesh for planet {}",x.getName());
         }
         logger.info("init");
@@ -71,18 +72,21 @@ public class PlanetRenderer {
                  camera,
                  frustum
         ) -> {
-            BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
             var instance = Minecraft.getInstance();
             if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
                 return;
             if (stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)) {
                 RenderType renderType = planetRenderType();
-                var texture = ResourceLocation.parse("deepspace:textures/sarrion.png");
-                RenderSystem.setShaderTexture(0, texture);
                 var poseStack = matrixStack.toPoseStack();
-                for (var x : MESHES.entrySet())
+                for (var x : MESHES.entrySet()) {
+                    BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+                    var texture = TEXTURES.get(x.getKey());
+                    RenderSystem.setShaderTexture(0, texture);
                     x.getValue().render(poseStack, builder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
-                renderType.draw(builder.buildOrThrow());
+
+                    renderType.draw(builder.buildOrThrow());
+
+                }
             }
         });
     }
