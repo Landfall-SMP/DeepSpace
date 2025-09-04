@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.planet.Planet;
 import world.landfall.deepspace.planet.PlanetRegistry;
+import world.landfall.deepspace.planet.Sun;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,12 +21,12 @@ import java.util.Objects;
 /**
  * Network packet for synchronizing planet data from server to client.
  */
-public record PlanetSyncPacket(List<Planet> planets) implements CustomPacketPayload {
+public record PlanetSyncPacket(List<Planet> planets, Sun sun) implements CustomPacketPayload {
     
     private static final Logger LOGGER = LogUtils.getLogger();
     
     public static final Type<PlanetSyncPacket> TYPE = new Type<>(
-        ResourceLocation.fromNamespaceAndPath(Deepspace.MODID, "planet_sync")
+        Deepspace.path("planet_sync")
     );
     
     public static final StreamCodec<FriendlyByteBuf, PlanetSyncPacket> STREAM_CODEC = StreamCodec.ofMember(
@@ -38,8 +39,8 @@ public record PlanetSyncPacket(List<Planet> planets) implements CustomPacketPayl
      *
      * @param planets The planets to sync
      */
-    public PlanetSyncPacket(@NotNull Collection<Planet> planets) {
-        this(new ArrayList<>(Objects.requireNonNull(planets, "Planets cannot be null")));
+    public PlanetSyncPacket(@NotNull Collection<Planet> planets, Sun sun) {
+        this(new ArrayList<>(Objects.requireNonNull(planets, "Planets cannot be null")), Objects.requireNonNull(sun,"Sun cannot be null"));
     }
     
     /**
@@ -49,7 +50,7 @@ public record PlanetSyncPacket(List<Planet> planets) implements CustomPacketPayl
      */
     @NotNull
     public static PlanetSyncPacket createSyncPacket() {
-        return new PlanetSyncPacket(PlanetRegistry.getAllPlanets());
+        return new PlanetSyncPacket(PlanetRegistry.getAllPlanets(), PlanetRegistry.getSun());
     }
     
     /**
@@ -66,6 +67,7 @@ public record PlanetSyncPacket(List<Planet> planets) implements CustomPacketPayl
         for (Planet planet : packet.planets) {
             planet.toNetwork(buffer);
         }
+        packet.sun.toNetwork(buffer);
     }
     
     /**
@@ -84,8 +86,9 @@ public record PlanetSyncPacket(List<Planet> planets) implements CustomPacketPayl
         for (int i = 0; i < planetCount; i++) {
             planets.add(Planet.fromNetwork(buffer));
         }
+        Sun sun = Sun.fromNetwork(buffer);
         
-        return new PlanetSyncPacket(planets);
+        return new PlanetSyncPacket(planets, sun);
     }
     
     /**
@@ -104,8 +107,9 @@ public record PlanetSyncPacket(List<Planet> planets) implements CustomPacketPayl
             for (Planet planet : packet.planets) {
                 PlanetRegistry.registerPlanet(planet);
             }
-            
             LOGGER.info("Synchronized {} planets from server", packet.planets.size());
+            PlanetRegistry.setSun(packet.sun);
+            LOGGER.info("Synchronized sun from server");
         });
     }
     

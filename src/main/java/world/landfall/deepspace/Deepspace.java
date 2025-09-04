@@ -26,6 +26,7 @@ import world.landfall.deepspace.dimension.SpaceDimensionType;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.PlanetRenderer;
 import world.landfall.deepspace.render.SpaceSkyRenderer;
+import world.landfall.deepspace.render.SunRenderer;
 
 import java.util.Objects;
 
@@ -89,12 +90,8 @@ public class Deepspace {
         PlanetRegistry.init();
         SpaceSkyRenderer.init();
         PlanetRenderer.init();
-
-        if (Config.logDirtBlock) LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
-
-        LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber);
-
-        Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
+        SunRenderer.init();
+        LOGGER.info("Initialized renderers");
     }
 
     // Add the example block item to the building blocks tab

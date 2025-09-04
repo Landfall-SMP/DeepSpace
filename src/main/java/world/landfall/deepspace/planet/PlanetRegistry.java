@@ -39,6 +39,7 @@ public class PlanetRegistry {
     private static final String PLANETS_CONFIG_FILE = "planets.json";
     
     private static final Map<String, Planet> planets = new ConcurrentHashMap<>();
+    private static volatile Sun sun;
     private static final Map<ResourceKey<Level>, Planet> planetsByDimension = new ConcurrentHashMap<>();
     private static final Object registryLock = new Object();
     private static volatile Path configPath;
@@ -46,6 +47,27 @@ public class PlanetRegistry {
     /**
      * Data class for JSON serialization of planet configurations.
      */
+
+    public static class SunConfig {
+        public double[] boundingBoxMin;
+        public double[] boundingBoxMax;
+        public double hurtRadius;
+        public SunConfig(Sun sun) {
+            var boundingBoxMin = sun.getBoundingBoxMin();
+            this.boundingBoxMin = new double[]{
+                    boundingBoxMin.x,
+                    boundingBoxMin.y,
+                    boundingBoxMin.z
+            };
+            var boundingBoxMax = sun.getBoundingBoxMax();
+            this.boundingBoxMax = new double[]{
+                    boundingBoxMax.x,
+                    boundingBoxMax.y,
+                    boundingBoxMax.z
+            };
+            this.hurtRadius = sun.getHurtRadius();
+        }
+    }
     public static class PlanetConfig {
         public String id;
         public String name;
@@ -79,13 +101,14 @@ public class PlanetRegistry {
      */
     public static class PlanetsConfig {
         public List<PlanetConfig> planets = new ArrayList<>();
-        
+        public SunConfig sun;
         public PlanetsConfig() {}
         
-        public PlanetsConfig(Collection<Planet> planets) {
+        public PlanetsConfig(Collection<Planet> planets, Sun sun) {
             this.planets = planets.stream()
                 .map(PlanetConfig::new)
                 .toList();
+            this.sun = new SunConfig(sun);
         }
     }
     
@@ -141,7 +164,11 @@ public class PlanetRegistry {
                 }
                 
                 LOGGER.info("Loaded {} planets from configuration", planets.size());
-                
+                try {
+                    sun = createSunFromConfig(config.sun);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to load sun configuration: ", e);
+                }
             } catch (IOException e) {
                 LOGGER.error("Failed to read planets configuration file", e);
                 createDefaultConfigurationUnsafe();
@@ -193,14 +220,32 @@ public class PlanetRegistry {
                 "The final dimension, home to the Ender Dragon"
             );
             registerPlanetUnsafe(end);
-            
+            sun = new Sun(
+                    new Vec3(-5000, 0, 0),
+                    new Vec3(-3000, 2000, 2000),
+                    1500
+            );
             LOGGER.info("Created default planet configuration with {} planets", planets.size());
             
         } catch (Exception e) {
             LOGGER.error("Failed to create default planet configuration", e);
         }
     }
-    
+    @NotNull
+    private static Sun createSunFromConfig(@NotNull SunConfig config) {
+        Objects.requireNonNull(config, "Sun config cannot be null");
+        if (config.boundingBoxMin == null || config.boundingBoxMin.length != 3) {
+            throw new IllegalArgumentException("Invalid bounding box minimum coordinates");
+        }
+        if (config.boundingBoxMax == null || config.boundingBoxMax.length != 3) {
+            throw new IllegalArgumentException("Invalid bounding box maximum coordinates");
+        }
+        return new Sun(
+                new Vec3(config.boundingBoxMin[0], config.boundingBoxMin[1], config.boundingBoxMin[2]),
+                new Vec3(config.boundingBoxMax[0], config.boundingBoxMax[1], config.boundingBoxMax[2]),
+                config.hurtRadius
+        );
+    }
     /**
      * Creates a Planet instance from a PlanetConfig.
      */
@@ -291,7 +336,23 @@ public class PlanetRegistry {
         Objects.requireNonNull(planetId, "Planet ID cannot be null");
         return planets.get(planetId);
     }
-    
+
+    /**
+     * Gets the current sun.
+     * @return The sun, or null if doesn't exist
+     */
+    @Nullable
+    public static Sun getSun() {
+        return sun;
+    }
+    /**
+     * Sets the current sun
+     * @param _sun The sun to set
+     */
+    public static boolean setSun(Sun _sun) {
+        sun = _sun;
+        return true;
+    }
     /**
      * Gets a planet by its dimension.
      *
@@ -360,6 +421,7 @@ public class PlanetRegistry {
         synchronized (registryLock) {
             planets.clear();
             planetsByDimension.clear();
+            sun = null;
             LOGGER.debug("Cleared all planets from registry");
         }
     }
