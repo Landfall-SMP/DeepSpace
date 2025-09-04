@@ -75,5 +75,5 @@ void main() {
     vertexDistance = fog_distance(pos, FogShape);
     vertexColor = Color * minecraft_sample_lightmap(Sampler2, UV2);
     float scale = 1.0f;
-    texCoord0 = UV0 + Time / 80;
+    texCoord0 = UV0 + Time / 320;
 }
