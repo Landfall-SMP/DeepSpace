@@ -21,7 +21,7 @@ import org.joml.Vector3f;
 import world.landfall.deepspace.dimension.SpaceDimensionEffects;
 import world.landfall.deepspace.dimension.SpaceDimensionType;
 
-@EventBusSubscriber(modid = Deepspace.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Deepspace.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ModDimensionEffects {
     public static DimensionSpecialEffects DEEPSPACE_EFFECTS = new SpaceDimensionEffects();
     @SubscribeEvent

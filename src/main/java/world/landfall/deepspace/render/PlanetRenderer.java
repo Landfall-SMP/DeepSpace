@@ -67,13 +67,18 @@ public class PlanetRenderer {
                 renderType
         );
     }
-
-    public static void init() {
+    public static void refreshMeshes() {
+        MESHES.clear();
+        TEXTURES.clear();
         for (var x : PlanetRegistry.getAllPlanets()) {
             MESHES.put(x.getId(),new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f()));
             TEXTURES.put(x.getId(), Deepspace.path("textures/"+x.getId()+".png"));
             logger.info("Made mesh for planet {}",x.getName());
         }
+
+    }
+    public static void init() {
+        refreshMeshes();
         VeilEventPlatform.INSTANCE.preVeilPostProcessing((location, pipeline, ctx) -> {
             pipeline.getOrCreateUniform("Time").setFloat(0.0f);
         });

@@ -44,9 +44,12 @@ public class SunRenderer {
                 renderType
         );
     }
-    public static void init() {
+    public static void refreshMeshes() {
         var sun = PlanetRegistry.getSun();
         MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f());
+    }
+    public static void init() {
+        refreshMeshes();
         VeilEventPlatform.INSTANCE.onVeilRenderLevelStage((stage,
                 levelRenderer,
                 bufferSource,

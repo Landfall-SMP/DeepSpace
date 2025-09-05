@@ -74,12 +74,11 @@ public class PlanetTeleportHandler {
                     0,
                     0
             );
-        } else if (dimension.equals(ResourceLocation.parse("deepspace:space")) && (closestPlanet.isPlayerTouching(player))) {
+        } else if (closestPlanet!=null&&dimension.equals(ResourceLocation.parse("deepspace:space")) && (closestPlanet.isPlayerTouching(player))) {
+            var newLevel = player.getServer().getLevel(closestPlanet.getDimension());
             player.teleportTo(
-                    player.getServer().getLevel(
-                            closestPlanet.getDimension()
-                    ),
-                    0, 300, 0,
+                    newLevel,
+                    0, newLevel.getHeight(), 0,
                     Set.of(),
                     0, 0
             );

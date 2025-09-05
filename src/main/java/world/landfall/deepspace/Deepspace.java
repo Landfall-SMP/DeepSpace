@@ -1,6 +1,7 @@
 package world.landfall.deepspace;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -88,10 +89,6 @@ public class Deepspace {
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Performing common setup for Deep Space");
         PlanetRegistry.init();
-        SpaceSkyRenderer.init();
-        PlanetRenderer.init();
-        SunRenderer.init();
-        LOGGER.info("Initialized renderers");
     }
 
     // Add the example block item to the building blocks tab
@@ -116,6 +113,10 @@ public class Deepspace {
         public static void onClientSetup(FMLClientSetupEvent event) {
             // Initialize client events
             LOGGER.info("Deep Space mod client initialized");
+            SpaceSkyRenderer.init();
+            PlanetRenderer.init();
+            SunRenderer.init();
+            LOGGER.info("Initialized renderers");
         }
     }
 }
