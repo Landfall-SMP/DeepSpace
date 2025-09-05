@@ -53,7 +53,7 @@ public class SpaceSkyRenderer {
                 "space_sky",
                 DefaultVertexFormat.BLOCK,
                 VertexFormat.Mode.TRIANGLES,
-                256, true, false,
+                786432, true, false,
                 renderType
         );
     }

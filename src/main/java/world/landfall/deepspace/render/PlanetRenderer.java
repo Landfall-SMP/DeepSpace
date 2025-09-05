@@ -63,7 +63,7 @@ public class PlanetRenderer {
                 "atmosphere",
                 DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL,
                 VertexFormat.Mode.TRIANGLES,
-                256, true, false,
+                786432, true, false,
                 renderType
         );
     }

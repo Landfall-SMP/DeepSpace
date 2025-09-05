@@ -46,7 +46,7 @@ in vec2 texCoord0;
 
 out vec4 fragColor;
 void main() {
-    vec4 color = texture(Sampler0, texCoord0) * vertexColor * ColorModulator;
+    vec4 color = texture(Sampler0, texCoord0) * ColorModulator;
     fragColor = color;
     gl_FragDepth = 1.0f;
 }
