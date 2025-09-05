@@ -72,7 +72,7 @@ public class SpaceSkyRenderer {
                     RenderType renderType = skyShaderType(SPACE_SKY_TEXTURE);
                     var poseStack = matrixStack.toPoseStack();
                     poseStack.pushPose();
-                    skySphere.render(poseStack, builder, new Vector3f(), new Quaternionf().rotateLocalX(-(float)Math.PI/2));
+                    skySphere.render(poseStack, builder, new Vector3f(), new Quaternionf());
 
                     renderType.draw(builder.buildOrThrow());
                     //VeilRenderType.endGateway().draw(builder.buildOrThrow());

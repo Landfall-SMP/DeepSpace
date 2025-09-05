@@ -8,20 +8,24 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.RandomSequence;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @EventBusSubscriber(modid = Deepspace.MODID)
@@ -44,12 +48,11 @@ public class PlanetTeleportHandler {
     };
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final RandomSource random = RandomSource.create();
-    private static final float DISTANCE_FROM_PLANET_TO_TELEPORT_FROM = 3;
+    private static final float DISTANCE_FROM_PLANET_TO_TELEPORT_FROM = 1.5f;
     // How high above the height limit do you need to go to teleport to deep space
     private static final int SPACE_DISTANCE_FROM_CEILING = 10;
     @SubscribeEvent
     public static void serverPlayerTick(PlayerTickEvent.Post event) {
-
         var player = event.getEntity();
         var level = player.level();
         if (level.getServer()==null) return;
@@ -80,7 +83,8 @@ public class PlanetTeleportHandler {
                     Set.of(),
                     0, 0
             );
-            player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING));
+            player.forceAddEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 20 * 120, 1, false, true), null);
+
         }
     }
 
