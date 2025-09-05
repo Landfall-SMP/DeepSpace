@@ -1,0 +1,36 @@
+{
+  "planets": [
+    {
+      "id": "overworld",
+      "name": "Overworld",
+      "dimension": "minecraft:overworld",
+      "boundingBoxMin": [-1000.0, -1000.0, -1000.0],
+      "boundingBoxMax": [1000.0, 1000.0, 1000.0],
+      "description": "The main world where players spawn"
+    },
+    {
+      "id": "nether",
+      "name": "The Nether",
+      "dimension": "minecraft:the_nether",
+      "boundingBoxMin": [2000.0, -500.0, -1000.0],
+      "boundingBoxMax": [4000.0, 500.0, 1000.0],
+      "description": "A hellish dimension filled with lava and dangerous creatures"
+    },
+    {
+      "id": "end",
+      "name": "The End",
+      "dimension": "minecraft:the_end",
+      "boundingBoxMin": [-2000.0, 1000.0, -1000.0],
+      "boundingBoxMax": [0.0, 3000.0, 1000.0],
+      "description": "The final dimension, home to the Ender Dragon"
+    },
+    {
+      "id": "custom_planet",
+      "name": "Custom Planet",
+      "dimension": "modname:custom_dimension",
+      "boundingBoxMin": [5000.0, 0.0, -2000.0],
+      "boundingBoxMax": [7000.0, 2000.0, 0.0],
+      "description": "An example custom planet from another mod"
+    }
+  ]
+} 
