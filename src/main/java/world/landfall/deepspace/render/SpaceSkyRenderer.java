@@ -32,6 +32,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import world.landfall.deepspace.Deepspace;
 
+import world.landfall.deepspace.integration.IrisIntegration;
 import world.landfall.deepspace.render.shapes.Sphere;
 
 

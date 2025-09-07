@@ -20,6 +20,7 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.integration.IrisIntegration;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.shapes.Cube;
 
@@ -66,7 +67,7 @@ public class SunRenderer {
                 return;
             if (!stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)) return;
 
-            RenderType planetRenderType = planetRenderType();
+            RenderType planetRenderType = IrisIntegration.isShaderPackEnabled() ? RenderType.solid() :  planetRenderType();
             var poseStack = matrixStack.toPoseStack();
             BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
             MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
