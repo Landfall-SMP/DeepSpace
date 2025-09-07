@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Quaternionf;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.integration.IrisIntegration;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.shapes.Cube;
 
@@ -98,7 +99,7 @@ public class PlanetRenderer {
             if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
                 return;
             if (stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)) {
-                RenderType planetRenderType = planetRenderType();
+                RenderType planetRenderType = IrisIntegration.isShaderPackEnabled() ? RenderType.solid() :  planetRenderType();
                 RenderType atmosphereRenderType = atmosphereRenderType();
                 VeilRenderSystem.setShader(Veil.veilPath("atmosphere"));
                 var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
@@ -108,7 +109,9 @@ public class PlanetRenderer {
                     // Planet surface
                     BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
                     var texture = TEXTURES.get(x.getKey());
+
                     RenderSystem.setShaderTexture(0, texture);
+
                     x.getValue().render(poseStack, planetBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
 
                     planetRenderType.draw(planetBuilder.buildOrThrow());
