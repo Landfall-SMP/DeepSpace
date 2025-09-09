@@ -76,23 +76,28 @@ public class JetpackItem extends Item implements Equipable {
         if (!(entity instanceof Player player)) return;
         if (!player.hasData(ModAttatchments.IS_FLYING_JETPACK)) return;
         var isFlying = player.getData(ModAttatchments.IS_FLYING_JETPACK.get());
+//        var isEquipped = stack.getEquipmentSlot() == EquipmentSlot.CHEST;
+//        if (!isEquipped) {
+//            return;
+//        }
         if (isFlying) {
-            if (player.isShiftKeyDown()) {
-                player.setData(ModAttatchments.IS_FLYING_JETPACK.get(), false);
+            if (player.isShiftKeyDown() || player.onGround()) {
+                player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
+                player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
+                player.setData(ModAttatchments.JETPACK_VELOCITY, new Vector3f());
                 return;
             }
             var lookAngle = player.getLookAngle();
             var deltas = player.getDeltaMovement();
             Vector3f storedVelocity = player.getData(ModAttatchments.JETPACK_VELOCITY);
 
-            var keyPressed = false;
-            while (ModKeyMappings.ROCKET_FORWARD.get().consumeClick()) {
-                keyPressed = true;
-            }
-            Vector3f newVelocity = new Vector3f(storedVelocity).add(lookAngle.toVector3f().mul(keyPressed ? 2 : 0));
+            var keyPressed = player.getData(ModAttatchments.IS_ROCKETING_FORWARD);
+            Vector3f newVelocity = new Vector3f(storedVelocity).add(lookAngle.toVector3f().mul(keyPressed ? .2f : 0)).mul(.9f);
+            if (newVelocity.length() > 2) newVelocity.mul(.9f);
+            newVelocity.add(new Vector3f(0, -.01f, 0));
+            //player.setPos(player.getPosition(0).add(new Vec3(newVelocity.x, newVelocity.y, newVelocity.z)));
+            player.setData(ModAttatchments.JETPACK_VELOCITY, newVelocity);
             player.setDeltaMovement(new Vec3(newVelocity.x, newVelocity.y, newVelocity.z));
-        } else {
-
         }
     }
 
@@ -110,7 +115,7 @@ public class JetpackItem extends Item implements Equipable {
     @Override
     public int getBarWidth(ItemStack stack) {
         var component = stack.getComponents().get(JetpackComponent.SUPPLIER.get());
-        return component != null ? (int)((float)component.currentFuel/component.maxFuel*100): 0;
+        return component != null ? (int)((float)component.currentFuel/component.maxFuel*13f): 0;
     }
 
     public static boolean isFlyEnabled(ItemStack stack) {

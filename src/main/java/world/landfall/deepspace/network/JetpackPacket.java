@@ -69,7 +69,7 @@ public class JetpackPacket {
             LOGGER.info("made it");
         }
         @Override
-        public Type<? extends CustomPacketPayload> type() {
+        public @NotNull Type<? extends CustomPacketPayload> type() {
             return TYPE;
         }
     }
