@@ -53,7 +53,7 @@ in vec3 Position;
 in vec4 Color;
 in vec2 UV0;
 in ivec2 UV2;
-in vec3 Normal;
+layout(location = 5) in vec3 Normal;
 
 uniform sampler2D Sampler2;
 
@@ -70,7 +70,7 @@ out vec2 texCoord0;
 void main() {
     vec3 pos = Position + ChunkOffset + VeilCamera.CameraBobOffset;
 
-    gl_Position = ProjMat * ModelViewMat * (vec4(pos + Normal * 4.0, 1.0));
+    gl_Position = ProjMat * ModelViewMat * (vec4(pos + Normal * 1.0, 1.0));
 
     vertexDistance = fog_distance(pos, FogShape);
     vertexColor = Color * minecraft_sample_lightmap(Sampler2, UV2);
