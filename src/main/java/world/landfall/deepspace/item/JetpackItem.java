@@ -80,6 +80,13 @@ public class JetpackItem extends Item implements Equipable {
 //        if (!isEquipped) {
 //            return;
 //        }
+        if (slotId != 38) {
+            player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
+            player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
+            player.setData(ModAttatchments.JETPACK_VELOCITY, new Vector3f());
+            return;
+        }
+        player.setSwimming(isFlying);
         if (isFlying) {
             if (player.isShiftKeyDown() || player.onGround()) {
                 player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
@@ -92,12 +99,22 @@ public class JetpackItem extends Item implements Equipable {
             Vector3f storedVelocity = player.getData(ModAttatchments.JETPACK_VELOCITY);
 
             var keyPressed = player.getData(ModAttatchments.IS_ROCKETING_FORWARD);
-            Vector3f newVelocity = new Vector3f(storedVelocity).add(lookAngle.toVector3f().mul(keyPressed ? .2f : 0)).mul(.9f);
+            var rocketVelocity = lookAngle.toVector3f().mul(.04f);
+            if (!inSpace)
+                rocketVelocity.add(new Vector3f(0f, .04f, 0f)).mul(.1f, 2f, .1f);
+            Vector3f newVelocity = new Vector3f(storedVelocity);
+            if (keyPressed)
+                newVelocity.add(rocketVelocity);
+            newVelocity.mul(.99f);
             if (newVelocity.length() > 2) newVelocity.mul(.9f);
-            newVelocity.add(new Vector3f(0, -.01f, 0));
+            if (!keyPressed)
+                newVelocity.add(new Vector3f(0, -.01f, 0));
             //player.setPos(player.getPosition(0).add(new Vec3(newVelocity.x, newVelocity.y, newVelocity.z)));
             player.setData(ModAttatchments.JETPACK_VELOCITY, newVelocity);
             player.setDeltaMovement(new Vec3(newVelocity.x, newVelocity.y, newVelocity.z));
+        } else {
+            var deltas = player.getDeltaMovement();
+            player.setData(ModAttatchments.JETPACK_VELOCITY, deltas.toVector3f());
         }
     }
 
