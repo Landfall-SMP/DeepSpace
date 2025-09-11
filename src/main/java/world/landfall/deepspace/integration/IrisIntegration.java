@@ -1,35 +1,53 @@
 package world.landfall.deepspace.integration;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.logging.LogUtils;
-import foundry.veil.api.client.render.texture.SimpleArrayTexture;
-import foundry.veil.api.client.render.vertex.VertexArrayBuilder;
-import net.irisshaders.iris.Iris;
-import net.irisshaders.iris.api.v0.IrisApi;
-import net.irisshaders.iris.gl.IrisRenderSystem;
-import net.irisshaders.iris.gl.texture.GlTexture;
-import net.irisshaders.iris.gl.texture.InternalTextureFormat;
-import net.irisshaders.iris.gl.texture.TextureDefinition;
-import net.irisshaders.iris.gl.texture.TextureType;
-import net.irisshaders.iris.pbr.format.TextureFormat;
-import net.irisshaders.iris.pipeline.IrisRenderingPipeline;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 
 public class IrisIntegration {
     private static Logger logger = LogUtils.getLogger();
-    private static IrisApi INSTANCE = IrisApi.getInstance();
-
+    private static Class IRIS_INSTANCE_CLASS;
+    private static Object IRIS_INSTANCE;
+    static {
+        try {
+            IRIS_INSTANCE_CLASS = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            IRIS_INSTANCE = IRIS_INSTANCE_CLASS.getDeclaredMethod("getInstance").invoke(null);
+        } catch (ReflectiveOperationException e) {
+            logger.error("", e);
+        }
+    }
     public static boolean isShaderPackEnabled() {
-        return INSTANCE.isShaderPackInUse();
+        try {
+            return (Boolean)IRIS_INSTANCE_CLASS.getDeclaredMethod("isShaderPackInUse").invoke(IRIS_INSTANCE);
+        } catch (ReflectiveOperationException e) {
+            logger.error("", e);
+            return false;
+        }
     }
     public static void bindPipeline() {
-        Iris.getPipelineManager().getPipeline().map(i -> {
-            if (i instanceof IrisRenderingPipeline ip) return ip; else return null;
-        }).ifPresent(IrisRenderingPipeline::bindDefault);
+        try {
+            Class iris = Class.forName("net.irisshaders.iris.Iris");
+            var pipelineManager = iris.getDeclaredMethod("getPipelineManager").invoke(null);
+            Optional<?> pipeline = (Optional<?>)Class.forName("net.irisshaders.iris.pipeline.PipelineManager").getDeclaredMethod("getPipeline").invoke(pipelineManager);
+            pipeline.map(i -> {
+                try {
+                    if (Class.forName("net.irisshaders.iris.pipeline.IrisRenderingPipeline").isInstance(i))
+                        return i;
+                    return null;
+                } catch (ClassNotFoundException e) {
+                    return null;
+                }
+            }).ifPresent(i -> {
+                try {
+                    Class.forName("net.irisshaders.iris.pipeline.IrisRenderingPipeline").getDeclaredMethod("bindDefault").invoke(i);
+                } catch (ReflectiveOperationException e) {
+                    logger.error("", e);
+                }
+            });
+        } catch (ReflectiveOperationException e) {
+            logger.error("Error in bindPipeline()", e);
+        }
     }
 }
