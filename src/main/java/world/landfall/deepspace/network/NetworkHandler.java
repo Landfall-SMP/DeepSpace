@@ -27,5 +27,15 @@ public class NetworkHandler {
             PlanetSyncPacket.STREAM_CODEC,
             PlanetSyncPacket::handle
         );
+        registrar.playToServer(
+                JetpackPacket.RocketForward.TYPE,
+                JetpackPacket.RocketForward.STREAM_CODEC,
+                JetpackPacket.RocketForward::handle
+        );
+        registrar.playToServer(
+                JetpackPacket.BeginFlying.TYPE,
+                JetpackPacket.BeginFlying.STREAM_CODEC,
+                JetpackPacket.BeginFlying::handle
+        );
     }
 } 

@@ -34,16 +34,7 @@ public class SunRenderer {
         return VeilRenderBridge.toShaderInstance(shader);
     });
     private static RenderType planetRenderType() {
-        var renderType = RenderType.CompositeState.builder()
-                .setShaderState(PLANET_RENDER_TYPE)
-                .createCompositeState(true);
-        return RenderType.create(
-                "planet",
-                DefaultVertexFormat.BLOCK,
-                VertexFormat.Mode.TRIANGLES,
-                786432, true, false,
-                renderType
-        );
+        return PlanetRenderer.planetRenderType();
     }
     public static void refreshMeshes() {
         var sun = PlanetRegistry.getSun();
@@ -65,13 +56,14 @@ public class SunRenderer {
             var instance = Minecraft.getInstance();
             if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
                 return;
-            if (!stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)) return;
+            if (!stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_PARTICLES)) return;
 
-            RenderType planetRenderType = IrisIntegration.isShaderPackEnabled() ? RenderType.solid() :  planetRenderType();
+            RenderType planetRenderType = planetRenderType();
             var poseStack = matrixStack.toPoseStack();
-            BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+            BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
             MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
             RenderSystem.setShaderTexture(0, TEXTURE);
+            IrisIntegration.bindPipeline();
             planetRenderType.draw(sunBuilder.buildOrThrow());
 
         });

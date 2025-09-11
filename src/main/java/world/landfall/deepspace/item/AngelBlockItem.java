@@ -39,8 +39,7 @@ public class AngelBlockItem extends BlockItem {
             var normal = direction.normalize();
             var pos = new Vec3(normal.x, normal.y, normal.z).scale(reach).add(player.position());
             var newResult = place(new BlockPlaceContext(player, usedHand, player.getUseItem(), new BlockHitResult(pos, Direction.getNearest(normal.x, normal.y, normal.z), roundToBlockPos(pos.add(new Vec3(-.5, 1, -.5))),true)));
-            System.out.println("A");
-            if (!player.isCreative() && newResult.equals(InteractionResult.SUCCESS))
+            if (!player.isCreative() && (newResult.equals(InteractionResult.SUCCESS) || newResult.equals(InteractionResult.CONSUME)))
                 player.getItemInHand(usedHand).shrink(1);
             if (newResult.equals(InteractionResult.SUCCESS))
                 return InteractionResultHolder.success(player.getItemInHand(usedHand));

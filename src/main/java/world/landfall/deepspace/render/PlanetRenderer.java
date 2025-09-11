@@ -43,26 +43,28 @@ public class PlanetRenderer {
         return VeilRenderBridge.toShaderInstance(shader);
     });
 
-    private static RenderType planetRenderType() {
+    public static RenderType planetRenderType() {
         var renderType = RenderType.CompositeState.builder()
                 .setShaderState(PLANET_RENDER_TYPE)
                 .createCompositeState(true);
         return RenderType.create(
                 "planet",
-                DefaultVertexFormat.BLOCK,
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
                 VertexFormat.Mode.TRIANGLES,
-                256, true, false,
+                786432, true, false,
                 renderType
         );
     }
+
     private static RenderType atmosphereRenderType() {
         var renderType = RenderType.CompositeState.builder()
                 .setShaderState(ATMOSPHERE_RENDER_TYPE)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setCullState(RenderStateShard.CullStateShard.NO_CULL)
                 .createCompositeState(true);
         return RenderType.create(
                 "atmosphere",
-                DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL,
+                DefaultVertexFormat.NEW_ENTITY,
                 VertexFormat.Mode.TRIANGLES,
                 786432, true, false,
                 renderType
@@ -98,8 +100,9 @@ public class PlanetRenderer {
             var instance = Minecraft.getInstance();
             if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
                 return;
-            if (stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)) {
-                RenderType planetRenderType = IrisIntegration.isShaderPackEnabled() ? RenderType.solid() :  planetRenderType();
+            if (stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_ENTITIES)) {
+                RenderType planetRenderType = planetRenderType();
+
                 RenderType atmosphereRenderType = atmosphereRenderType();
                 VeilRenderSystem.setShader(Veil.veilPath("atmosphere"));
                 var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
@@ -107,20 +110,20 @@ public class PlanetRenderer {
                 var poseStack = matrixStack.toPoseStack();
                 for (var x : MESHES.entrySet()) {
                     // Planet surface
-                    BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+                    BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
                     var texture = TEXTURES.get(x.getKey());
 
-                    RenderSystem.setShaderTexture(0, texture);
 
                     x.getValue().render(poseStack, planetBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
+                    RenderSystem.setShaderTexture(0, texture);
 
+                    IrisIntegration.bindPipeline();
                     planetRenderType.draw(planetBuilder.buildOrThrow());
-
                     // Planet Atmosphere
-                    BufferBuilder atmosphereBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+                    BufferBuilder atmosphereBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
                     x.getValue().render(poseStack, atmosphereBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
                     RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
-                    atmosphereRenderType.draw(atmosphereBuilder.buildOrThrow());
+                        atmosphereRenderType.draw(atmosphereBuilder.buildOrThrow());
                 }
             }
         });
