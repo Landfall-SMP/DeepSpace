@@ -3,6 +3,7 @@ package world.landfall.deepspace.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
@@ -16,8 +17,10 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.ModAttatchments;
+import world.landfall.deepspace.ModItems;
 import world.landfall.deepspace.ModKeyMappings;
 import world.landfall.deepspace.dimension.SpaceDimensionEffects;
+import world.landfall.deepspace.item.JetpackItem;
 import world.landfall.deepspace.network.JetpackPacket;
 
 @EventBusSubscriber(modid = Deepspace.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
@@ -31,19 +34,25 @@ public class SpaceClientEvents {
         private static int ticksSinceRocket = 0;
         @SubscribeEvent
         public static void onClientTick(PlayerTickEvent.Pre event) {
-            if (Minecraft.getInstance().options.keyJump.isDown()) {
-                PacketDistributor.sendToServer(
-                        new JetpackPacket.RocketForward()
-                );
-                event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, true);
-                ticksSinceRocket = 0;
-            } else event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
+            var player = event.getEntity();
+            var item = player.getItemBySlot(EquipmentSlot.CHEST);
+            if (item.is(ModItems.JETPACK_ITEM)) {
+                var component = item.getComponents().get(JetpackItem.JetpackComponent.SUPPLIER.get());
+                if (component == null) return;
+                if (Minecraft.getInstance().options.keyJump.isDown() && component.canFly()) {
+                    PacketDistributor.sendToServer(
+                            new JetpackPacket.RocketForward()
+                    );
+                    event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, true);
+                    ticksSinceRocket = 0;
+                } else event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
 
-            if (ModKeyMappings.BEGIN_FLYING.get().isDown()) {
-                PacketDistributor.sendToServer(
-                        new JetpackPacket.BeginFlying()
-                );
-                event.getEntity().setData(ModAttatchments.IS_FLYING_JETPACK, true);
+                if (ModKeyMappings.BEGIN_FLYING.get().isDown() && component.canFly()) {
+                    PacketDistributor.sendToServer(
+                            new JetpackPacket.BeginFlying()
+                    );
+                    event.getEntity().setData(ModAttatchments.IS_FLYING_JETPACK, true);
+                }
             }
         }
         @SubscribeEvent
