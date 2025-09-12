@@ -14,9 +14,11 @@ import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.integration.IrisIntegration;
@@ -108,7 +110,11 @@ public class PlanetRenderer {
                 var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
                 TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
                 var poseStack = matrixStack.toPoseStack();
-
+                var gameRenderer = Minecraft.getInstance().gameRenderer;
+//                RenderSystem.setProjectionMatrix(projectionMatrix(
+//                        projectionMatrix.perspectiveFov(),
+//                        gameRenderer
+//                ), null);
                 for (var x : MESHES.entrySet()) {
                     // Planet surface
                     BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
@@ -129,5 +135,14 @@ public class PlanetRenderer {
                 }
             }
         });
+    }
+    private static Matrix4f projectionMatrix(double fov, GameRenderer gameRenderer) {
+        Matrix4f mat = new Matrix4f();
+        return mat.perspective(
+                (float)(fov * (float)(Math.PI / 180.0)),
+                (float)gameRenderer.getMinecraft().getWindow().getWidth() / (float)gameRenderer.getMinecraft().getWindow().getHeight(),
+                0.05f,
+                gameRenderer.getDepthFar() * 4f
+        );
     }
 }

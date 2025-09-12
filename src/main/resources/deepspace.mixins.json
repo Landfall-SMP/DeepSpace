@@ -5,8 +5,10 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "deepspace.refmap.json",
   "mixins": [
+    "MixinGameRenderer"
   ],
   "client": [
+    "MixinGameRenderer"
   ],
   "injectors": {
     "defaultRequire": 1

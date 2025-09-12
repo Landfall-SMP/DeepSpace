@@ -13,9 +13,12 @@ import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.slf4j.Logger;
@@ -63,10 +66,25 @@ public class SunRenderer {
             BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
             MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
             RenderSystem.setShaderTexture(0, TEXTURE);
+            var gameRenderer = Minecraft.getInstance().gameRenderer;
+
+
+
+
             IrisIntegration.bindPipeline();
             planetRenderType.draw(sunBuilder.buildOrThrow());
-
+            RenderSystem.restoreProjectionMatrix();
         });
     }
+    private static Matrix4f projectionMatrix(double fov, GameRenderer gameRenderer) {
+        Matrix4f mat = new Matrix4f();
+        return mat.perspective(
+                (float)(fov * (float)(Math.PI / 180.0)),
+                (float)gameRenderer.getMinecraft().getWindow().getWidth() / (float)gameRenderer.getMinecraft().getWindow().getHeight(),
+                0.05f,
+                gameRenderer.getDepthFar() * 4f
+        );
+    }
+
 
 }
