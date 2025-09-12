@@ -193,8 +193,8 @@ public class PlanetRegistry {
                 "overworld",
                 "Overworld",
                 Level.OVERWORLD,
-                new Vec3(-1000, -1000, -1000),
-                new Vec3(1000, 1000, 1000),
+                new Vec3(-100, -100, -100),
+                new Vec3(100, 100, 100),
                 "The main world where players spawn"
             );
             registerPlanetUnsafe(overworld);
@@ -204,8 +204,8 @@ public class PlanetRegistry {
                 "nether",
                 "The Nether",
                 Level.NETHER,
-                new Vec3(2000, -500, -1000),
-                new Vec3(4000, 500, 1000),
+                new Vec3(200, -50, -100),
+                new Vec3(400, 150, 100),
                 "A hellish dimension filled with lava and dangerous creatures"
             );
             registerPlanetUnsafe(nether);
@@ -215,14 +215,14 @@ public class PlanetRegistry {
                 "end",
                 "The End",
                 Level.END,
-                new Vec3(-2000, 1000, -1000),
-                new Vec3(0, 3000, 1000),
+                new Vec3(-200, 100, -100),
+                new Vec3(0, 300, 100),
                 "The final dimension, home to the Ender Dragon"
             );
             registerPlanetUnsafe(end);
             sun = new Sun(
-                    new Vec3(-5000, 0, 0),
-                    new Vec3(-3000, 2000, 2000),
+                    new Vec3(-500, 0, 0),
+                    new Vec3(-300, 200, 200),
                     1500
             );
             LOGGER.info("Created default planet configuration with {} planets", planets.size());

@@ -3,32 +3,42 @@ package world.landfall.deepspace.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Equipable;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.model.JetSuitArmorModel;
 
 import java.awt.*;
 import java.util.function.Supplier;
 
-public class JetHelmetItem extends Item implements Equipable {
+public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
     public JetHelmetItem() {
-        super(new Properties()
+        super(ArmorMaterials.IRON, Type.HELMET,new Properties()
                 .durability(-1)
                 .component(JetHelmetComponent.SUPPLIER, new JetHelmetComponent(100, 100))
         );
+
     }
 
     @Override
@@ -68,6 +78,16 @@ public class JetHelmetItem extends Item implements Equipable {
     public int getBarColor(ItemStack stack) {
         var component = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
         return (component != null && component.playerOxygen() > 3) ? Color.WHITE.getRGB() : Color.RED.getRGB();
+    }
+
+    @Override
+    public @Nullable ResourceLocation getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, ArmorMaterial.Layer layer, boolean innerModel) {
+        return ResourceLocation.parse("minecraft:block/glass");
+    }
+
+    @Override
+    public @NotNull Model getGenericArmorModel(@NotNull LivingEntity livingEntity, @NotNull ItemStack itemStack, @NotNull EquipmentSlot equipmentSlot, @NotNull HumanoidModel<?> original) {
+        return new JetSuitArmorModel<Player>(original.head);
     }
 
     public record JetHelmetComponent(int currentOxygen, int maxOxygen) {
