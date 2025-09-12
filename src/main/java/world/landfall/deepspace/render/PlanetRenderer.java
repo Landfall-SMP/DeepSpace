@@ -108,10 +108,12 @@ public class PlanetRenderer {
                 var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
                 TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
                 var poseStack = matrixStack.toPoseStack();
+
                 for (var x : MESHES.entrySet()) {
                     // Planet surface
                     BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
                     var texture = TEXTURES.get(x.getKey());
+
 
 
                     x.getValue().render(poseStack, planetBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());

@@ -3,17 +3,22 @@ package world.landfall.deepspace.server;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.*;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -21,26 +26,16 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.ModAttatchments;
+import world.landfall.deepspace.ModDamageTypes;
 import world.landfall.deepspace.ModItems;
+import world.landfall.deepspace.item.JetHelmetItem;
 import world.landfall.deepspace.item.JetpackItem;
 
 public class SpacePlayerEvents {
     @EventBusSubscriber(modid = Deepspace.MODID)
     public static class Tick {
-        @SubscribeEvent
-        public static void playerTick(PlayerTickEvent.Post event) {
-
-            Player player = event.getEntity();
-            var dimension = player.level().dimension().location();
-            var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space"));
-            player.setNoGravity(noGravity);
-            //player.setIgnoreFallDamageFromCurrentImpulse(noGravity);
-            if (noGravity) {
-                player.setDeltaMovement(player.getDeltaMovement().add(new Vec3(0, -.01f, 0)));
-
-            }
-            var jetpackSlot = player.getItemBySlot(EquipmentSlot.CHEST);
-            var hasJetpack = jetpackSlot.is(ModItems.JETPACK_ITEM.get());
+        private static void jetpackTick(Player player, Level level, ItemStack jetpack, boolean noGravity) {
+            var hasJetpack = jetpack.is(ModItems.JETPACK_ITEM.get());
             if (!player.hasData(ModAttatchments.IS_FLYING_JETPACK)) return;
             var isFlying = player.getData(ModAttatchments.IS_FLYING_JETPACK.get());
 
@@ -56,7 +51,7 @@ public class SpacePlayerEvents {
                 player.setData(ModAttatchments.JETPACK_VELOCITY, new Vector3f());
                 return;
             }
-            var jetpackComponent = jetpackSlot.getComponents().get(JetpackItem.JetpackComponent.SUPPLIER.get());
+            var jetpackComponent = jetpack.getComponents().get(JetpackItem.JetpackComponent.SUPPLIER.get());
             if (isFlying) {
                 player.setPose(Pose.FALL_FLYING);
                 if (player.isShiftKeyDown() || player.onGround() || (jetpackComponent != null && !jetpackComponent.canFly())) {
@@ -76,12 +71,12 @@ public class SpacePlayerEvents {
                 Vector3f newVelocity = new Vector3f(storedVelocity);
                 if (keyPressed) {
                     newVelocity.add(rocketVelocity);
-                    var random = player.level().getRandom();
+                    var random = level.getRandom();
                     for (int i = 0; i < 4; i++) {
                         var offset = new Vector3f(random.nextFloat() * 2 - 1,random.nextFloat() * 2 - 1,random.nextFloat() * 2 - 1).mul(.4f);
                         var oppositeForce = new Vector3f(newVelocity).normalize();
                         offset.sub(oppositeForce.mul(2));
-                        player.level().addParticle(ParticleTypes.FLAME,
+                        level.addParticle(ParticleTypes.FLAME,
                                 player.getX() + offset.x, player.getY() + offset.y, player.getZ() + offset.z,
                                 oppositeForce.x * -.1, oppositeForce.y * -.1, oppositeForce.z * -.1
                         );
@@ -114,6 +109,39 @@ public class SpacePlayerEvents {
                 var deltas = player.getDeltaMovement();
                 player.setData(ModAttatchments.JETPACK_VELOCITY, deltas.toVector3f());
             }
+        }
+        private static void jetHelmetTick(Player player, Level level, ItemStack jetHelmet, boolean noGravity) {
+            var hasJetHelmet = jetHelmet.is(ModItems.JET_HELMET_ITEM.get());
+            var component = jetHelmet.getComponents().get(JetHelmetItem.JetHelmetComponent.SUPPLIER.get());
+            var tick = player.tickCount;
+            if (component != null && noGravity && !player.isCreative()) {
+                player.setAirSupply(component.playerOxygen());
+                if (component.playerOxygen() < 1 && tick % 10 == 0)
+                    player.hurt(ModDamageTypes.noAirDamage(player), 1);
+            } else if (!hasJetHelmet && noGravity) {
+                player.setAirSupply(0);
+                if (tick % 10 == 0)
+                    player.hurt(ModDamageTypes.noAirDamage(player), 2);
+
+
+            }
+        }
+        @SubscribeEvent
+        public static void playerTick(PlayerTickEvent.Post event) {
+
+            Player player = event.getEntity();
+            var dimension = player.level().dimension().location();
+            var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space"));
+            player.setNoGravity(noGravity);
+            //player.setIgnoreFallDamageFromCurrentImpulse(noGravity);
+            if (noGravity) {
+                player.setDeltaMovement(player.getDeltaMovement().add(new Vec3(0, -.01f, 0)));
+
+            }
+            var jetpackSlot = player.getItemBySlot(EquipmentSlot.CHEST);
+            var jetHelmetSlot = player.getItemBySlot(EquipmentSlot.HEAD);
+            jetpackTick(player, player.level(), jetpackSlot, noGravity);
+            jetHelmetTick(player, player.level(), jetHelmetSlot, noGravity);
         }
         private static float angle(float x, float y) {
             var rot = (float)Math.atan(y/x) / ((float)Math.PI*2) * 360;
