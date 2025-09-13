@@ -53,6 +53,7 @@ public class SpacePlayerEvents {
             }
             var jetpackComponent = jetpack.getComponents().get(JetpackItem.JetpackComponent.SUPPLIER.get());
             if (isFlying) {
+                player.getAbilities().flying = false;
                 player.setPose(Pose.FALL_FLYING);
                 if (player.isShiftKeyDown() || player.onGround() || (jetpackComponent != null && !jetpackComponent.canFly())) {
                     player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
@@ -134,9 +135,8 @@ public class SpacePlayerEvents {
             var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space"));
             player.setNoGravity(noGravity);
             //player.setIgnoreFallDamageFromCurrentImpulse(noGravity);
-            if (noGravity) {
+            if (noGravity && !player.getAbilities().flying) {
                 player.setDeltaMovement(player.getDeltaMovement().add(new Vec3(0, -.01f, 0)));
-
             }
             var jetpackSlot = player.getItemBySlot(EquipmentSlot.CHEST);
             var jetHelmetSlot = player.getItemBySlot(EquipmentSlot.HEAD);

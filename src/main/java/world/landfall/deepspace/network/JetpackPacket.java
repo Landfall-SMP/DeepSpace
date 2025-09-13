@@ -15,7 +15,7 @@ import java.util.Objects;
 public class JetpackPacket {
     private static Logger LOGGER = LogUtils.getLogger();
 
-    public record RocketForward() implements CustomPacketPayload {
+    public record RocketForward(boolean rocketing) implements CustomPacketPayload {
         public static final CustomPacketPayload.Type<RocketForward> TYPE = new Type<>(
                 Deepspace.path("rocket_forward")
         );
@@ -24,30 +24,30 @@ public class JetpackPacket {
             RocketForward::decode
         );
 
-        public static RocketForward create() {
-            return new RocketForward();
-        }
-        public static void encode(@NotNull RocketForward packet, @NotNull FriendlyByteBuf buffer) {}
+        public static void encode(@NotNull RocketForward packet, @NotNull FriendlyByteBuf buffer) {buffer.writeBoolean(packet.rocketing);}
         public static @NotNull RocketForward decode(FriendlyByteBuf buf) {
-            return new RocketForward();
+            return new RocketForward(buf.readBoolean());
         }
         public static void handle(@NotNull RocketForward packet, IPayloadContext ctx) {
             Objects.requireNonNull(packet, "Packet cannot be null!");
             Objects.requireNonNull(ctx, "Context cannot be null!");
             var player = ctx.player();
             if (player.level().isClientSide) return;
-            if (!player.hasData(ModAttatchments.IS_FLYING_JETPACK)) return;
+            if (!player.hasData(ModAttatchments.IS_FLYING_JETPACK)) {
+                player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
+                return;
+            }
 
             var isFlying = player.getData(ModAttatchments.IS_FLYING_JETPACK);
             if (!isFlying) return;
-            player.setData(ModAttatchments.IS_ROCKETING_FORWARD, true);
+            player.setData(ModAttatchments.IS_ROCKETING_FORWARD, packet.rocketing);
         }
         @Override
         public @NotNull Type<? extends CustomPacketPayload> type() {
             return TYPE;
         }
     }
-    public record BeginFlying() implements CustomPacketPayload {
+    public record BeginFlying(boolean flying) implements CustomPacketPayload {
         public static final Type<BeginFlying> TYPE = new Type<>(
                 Deepspace.path("begin_flying")
         );
@@ -56,17 +56,23 @@ public class JetpackPacket {
                 BeginFlying::encode,
                 BeginFlying::decode
         );
-        public static void encode(@NotNull BeginFlying packet, @NotNull FriendlyByteBuf buffer) {}
-        public static @NotNull BeginFlying decode(FriendlyByteBuf buf) {return new BeginFlying();}
+        public static void encode(@NotNull BeginFlying packet, @NotNull FriendlyByteBuf buffer) {
+            Objects.requireNonNull(packet, "Packet cannot be null");
+            Objects.requireNonNull(buffer, "Buffer cannot be null");
+
+            buffer.writeBoolean(packet.flying);
+        }
+        public static @NotNull BeginFlying decode(FriendlyByteBuf buf) {return new BeginFlying(buf.readBoolean());}
         public static void handle(@NotNull BeginFlying packet, @NotNull IPayloadContext ctx) {
             Objects.requireNonNull(packet, "Packet cannot be null!");
             Objects.requireNonNull(ctx, "Context cannot be null!");
             var player = ctx.player();
-            if (player.level().isClientSide ||
-                player.getData(ModAttatchments.IS_FLYING_JETPACK) ||
-                player.onGround()) return;
-            player.setData(ModAttatchments.IS_FLYING_JETPACK, true);
-            LOGGER.info("made it");
+            if (player.level().isClientSide) return;
+            if (player.onGround()) {
+                player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
+                player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
+            } else
+                player.setData(ModAttatchments.IS_FLYING_JETPACK, packet.flying);
         }
         @Override
         public @NotNull Type<? extends CustomPacketPayload> type() {

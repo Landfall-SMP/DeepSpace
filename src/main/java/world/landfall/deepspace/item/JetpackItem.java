@@ -11,6 +11,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -55,7 +57,13 @@ public class JetpackItem extends Item implements Equipable {
         if (!(entity instanceof Player player)) return;
 
         var tick = player.tickCount;
-        if (player.getData(ModAttatchments.IS_ROCKETING_FORWARD) && tick % 20 == 0) {
+        if (!(player.getData(ModAttatchments.IS_FLYING_JETPACK) && player.getData(ModAttatchments.IS_ROCKETING_FORWARD)))
+            return;
+        if (tick % 5 == 0) {
+            player.level().playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, .1f, .5f);
+
+        }
+        if (tick % 20 == 0) {
             var component = stack.getComponents().get(JetpackComponent.SUPPLIER.get());
             if (component == null) return;
             if (component.maxFuel > 0)
