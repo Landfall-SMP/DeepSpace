@@ -12,12 +12,40 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents a planet in the Deep Space dimension with its associated dimension and bounding box.
  */
 public class Planet {
+    public record PlanetDecoration(Type type, float scale, int color) {
+        public enum Type {
+            ATMOSPHERE("atmosphere"),
+            RINGS("rings"),
+            ASTEROIDS("asteroids");
+            public final String type;
+            private Type(String type) {
+                this.type = type;
+            }
+        }
+        public static final Codec<PlanetDecoration> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.STRING.fieldOf("type").forGetter(decoration -> decoration.type.type),
+                Codec.FLOAT.fieldOf("scale").forGetter(PlanetDecoration::scale),
+                Codec.INT.fieldOf("color").forGetter(PlanetDecoration::color)
+        ).apply(instance, (type, scale, color) -> new PlanetDecoration(Type.valueOf(type), scale, color)));
+        public static void toNetwork(@NotNull FriendlyByteBuf buffer, @NotNull PlanetDecoration decoration) {
+            buffer.writeInt(decoration.type.ordinal());
+            buffer.writeFloat(decoration.scale);
+            buffer.writeInt(decoration.color);
+        }
+        public static PlanetDecoration fromNetwork(@NotNull FriendlyByteBuf buffer) {
+            return new PlanetDecoration(Type.values()[buffer.readInt()], buffer.readFloat(), buffer.readInt());
+        }
+
+    }
     public static final Codec<Planet> CODEC = RecordCodecBuilder.create(instance ->
         instance.group(
             Codec.STRING.fieldOf("id").forGetter(Planet::getId),
@@ -25,11 +53,13 @@ public class Planet {
             ResourceLocation.CODEC.fieldOf("dimension").forGetter(planet -> planet.getDimension().location()),
             Vec3.CODEC.fieldOf("boundingBoxMin").forGetter(Planet::getBoundingBoxMin),
             Vec3.CODEC.fieldOf("boundingBoxMax").forGetter(Planet::getBoundingBoxMax),
+            Codec.list(PlanetDecoration.CODEC).optionalFieldOf("decorations").forGetter(Planet::getDecorations),
             Codec.STRING.optionalFieldOf("description", "").forGetter(Planet::getDescription)
-        ).apply(instance, (id, name, dimensionLocation, min, max, description) ->
-            new Planet(id, name, ResourceKey.create(Registries.DIMENSION, dimensionLocation), min, max, description)
+        ).apply(instance, (id, name, dimensionLocation, min, max, decorations, description) ->
+            new Planet(id, name, ResourceKey.create(Registries.DIMENSION, dimensionLocation), min, max, decorations.get(), description)
         )
     );
+
 
     private final String id;
     private final String name;
@@ -37,6 +67,7 @@ public class Planet {
     private final Vec3 boundingBoxMin;
     private final Vec3 boundingBoxMax;
     private final String description;
+    private final Collection<PlanetDecoration> decorations;
 
     /**
      * Creates a new Planet instance.
@@ -49,13 +80,14 @@ public class Planet {
      * @param description Optional description of the planet
      */
     public Planet(@NotNull String id, @NotNull String name, @NotNull ResourceKey<Level> dimension,
-                  @NotNull Vec3 boundingBoxMin, @NotNull Vec3 boundingBoxMax, @Nullable String description) {
+                  @NotNull Vec3 boundingBoxMin, @NotNull Vec3 boundingBoxMax, @Nullable Collection<PlanetDecoration> decorations, @Nullable String description) {
         this.id = Objects.requireNonNull(id, "Planet ID cannot be null");
         this.name = Objects.requireNonNull(name, "Planet name cannot be null");
         this.dimension = Objects.requireNonNull(dimension, "Planet dimension cannot be null");
         this.boundingBoxMin = Objects.requireNonNull(boundingBoxMin, "Bounding box minimum cannot be null");
         this.boundingBoxMax = Objects.requireNonNull(boundingBoxMax, "Bounding box maximum cannot be null");
         this.description = description != null ? description : "";
+        this.decorations = decorations != null ? decorations : List.of();
 
         // Validate bounding box
         if (boundingBoxMin.x > boundingBoxMax.x || boundingBoxMin.y > boundingBoxMax.y || boundingBoxMin.z > boundingBoxMax.z) {
@@ -67,8 +99,8 @@ public class Planet {
      * Creates a new Planet instance without description.
      */
     public Planet(@NotNull String id, @NotNull String name, @NotNull ResourceKey<Level> dimension,
-                  @NotNull Vec3 boundingBoxMin, @NotNull Vec3 boundingBoxMax) {
-        this(id, name, dimension, boundingBoxMin, boundingBoxMax, "");
+                  @NotNull Vec3 boundingBoxMin, @NotNull Vec3 boundingBoxMax, @NotNull Collection<PlanetDecoration> decorations) {
+        this(id, name, dimension, boundingBoxMin, boundingBoxMax, decorations, "");
     }
 
     /**
@@ -109,6 +141,11 @@ public class Planet {
     @NotNull
     public Vec3 getBoundingBoxMax() {
         return boundingBoxMax;
+    }
+
+    @NotNull
+    public Optional<List<PlanetDecoration>> getDecorations() {
+        return Optional.of(decorations.stream().toList());
     }
 
     /**
@@ -177,6 +214,7 @@ public class Planet {
         buffer.writeDouble(boundingBoxMax.x);
         buffer.writeDouble(boundingBoxMax.y);
         buffer.writeDouble(boundingBoxMax.z);
+        buffer.writeCollection(decorations, PlanetDecoration::toNetwork);
         buffer.writeUtf(description);
     }
 
@@ -195,8 +233,9 @@ public class Planet {
         ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, dimensionLocation);
         Vec3 boundingBoxMin = new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
         Vec3 boundingBoxMax = new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+        Collection<PlanetDecoration> decorations = buffer.readList(PlanetDecoration::fromNetwork);
         String description = buffer.readUtf();
-        return new Planet(id, name, dimension, boundingBoxMin, boundingBoxMax, description);
+        return new Planet(id, name, dimension, boundingBoxMin, boundingBoxMax, decorations, description);
     }
 
     @Override

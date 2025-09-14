@@ -4,19 +4,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import foundry.veil.api.client.color.Color;
-import org.joml.Quaternionf;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
+import org.joml.*;
 import org.slf4j.Logger;
 
+import java.lang.Math;
 import java.util.LinkedList;
 
 public class Cube implements DeepSpaceRenderable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private LinkedList<Triangle> TRIANGLES = new LinkedList<>();
     private final Vector3f center;
-    public Cube(Vector3f _corner1, Vector3f _corner2) {
+    public Cube(Vector3f _corner1, Vector3f _corner2, float scale) {
         var corner1 = new Vector3f(
                 _corner1.x,
                 _corner1.y,
@@ -40,6 +38,7 @@ public class Cube implements DeepSpaceRenderable {
                 new Quaternionf().rotateLocalY((float)Math.PI/2),
                 new Quaternionf().rotateLocalY(-(float)Math.PI/2)
         };
+        diff.mul(scale);
         for (var x : rotations) {
             Vector3f[] vertexes = new Vector3f[] {
                     new Vector3f(diff.x, diff.y, diff.z),
@@ -86,6 +85,7 @@ public class Cube implements DeepSpaceRenderable {
                 var oldVertex = triangle.vertexes[i];
                 var vertex = new Vector3f(oldVertex.x, oldVertex.y, oldVertex.z);
                 vertex.rotate(rotation);
+
                 var UV = triangle.UV[i];
                 var normal = new Vector3f(vertex).sub(center).normalize();
                 consumer.addVertex(vertex.x+dimensions.x(), vertex.y+dimensions.y(), vertex.z+dimensions.z(),

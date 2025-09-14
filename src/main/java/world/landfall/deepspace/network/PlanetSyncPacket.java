@@ -12,6 +12,7 @@ import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.planet.Planet;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.planet.Sun;
+import world.landfall.deepspace.render.PlanetDecorationsRenderer;
 import world.landfall.deepspace.render.PlanetRenderer;
 import world.landfall.deepspace.render.SunRenderer;
 
@@ -113,6 +114,7 @@ public record PlanetSyncPacket(List<Planet> planets, Sun sun) implements CustomP
             PlanetRegistry.setSun(packet.sun);
             LOGGER.info("Synchronized sun from server");
             PlanetRenderer.refreshMeshes();
+            PlanetDecorationsRenderer.refreshMeshes();
             SunRenderer.refreshMeshes();
         });
     }

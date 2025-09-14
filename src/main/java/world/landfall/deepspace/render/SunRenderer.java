@@ -43,7 +43,7 @@ public class SunRenderer {
     }
     public static void refreshMeshes() {
         var sun = PlanetRegistry.getSun();
-        MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f());
+        MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f(), 1f);
     }
     public static void render(
             VeilRenderLevelStageEvent.Stage stage,
@@ -66,9 +66,11 @@ public class SunRenderer {
         BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
         MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
         RenderSystem.setShaderTexture(0, TEXTURE);
-
+        var overloadedColor = 70f;
+        RenderSystem.setShaderColor(overloadedColor, overloadedColor, overloadedColor, 3f);
         IrisIntegration.bindPipeline();
         planetRenderType.draw(sunBuilder.buildOrThrow());
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.restoreProjectionMatrix();
     }
     public static void init() {

@@ -21,11 +21,13 @@ import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.network.PlanetSyncPacket;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -74,6 +76,7 @@ public class PlanetRegistry {
         public String dimension;
         public double[] boundingBoxMin;
         public double[] boundingBoxMax;
+        public Collection<Planet.PlanetDecoration> decorations;
         public String description = "";
         
         public PlanetConfig() {}
@@ -92,6 +95,10 @@ public class PlanetRegistry {
                 planet.getBoundingBoxMax().y,
                 planet.getBoundingBoxMax().z
             };
+            if (planet.getDecorations().isPresent())
+                this.decorations = planet.getDecorations().get();
+            else
+                this.decorations = List.of();
             this.description = planet.getDescription();
         }
     }
@@ -195,6 +202,7 @@ public class PlanetRegistry {
                 Level.OVERWORLD,
                 new Vec3(-100, -100, -100),
                 new Vec3(100, 100, 100),
+                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1.05f, Color.WHITE.getRGB())),
                 "The main world where players spawn"
             );
             registerPlanetUnsafe(overworld);
@@ -206,6 +214,7 @@ public class PlanetRegistry {
                 Level.NETHER,
                 new Vec3(200, -50, -100),
                 new Vec3(400, 150, 100),
+                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1f, Color.RED.getRGB())),
                 "A hellish dimension filled with lava and dangerous creatures"
             );
             registerPlanetUnsafe(nether);
@@ -217,6 +226,7 @@ public class PlanetRegistry {
                 Level.END,
                 new Vec3(-200, 100, -100),
                 new Vec3(0, 300, 100),
+                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1f, Color.WHITE.getRGB())),
                 "The final dimension, home to the Ender Dragon"
             );
             registerPlanetUnsafe(end);
@@ -277,7 +287,7 @@ public class PlanetRegistry {
         Vec3 boundingBoxMin = new Vec3(config.boundingBoxMin[0], config.boundingBoxMin[1], config.boundingBoxMin[2]);
         Vec3 boundingBoxMax = new Vec3(config.boundingBoxMax[0], config.boundingBoxMax[1], config.boundingBoxMax[2]);
         
-        return new Planet(config.id, config.name, dimension, boundingBoxMin, boundingBoxMax, config.description);
+        return new Planet(config.id, config.name, dimension, boundingBoxMin, boundingBoxMax, config.decorations, config.description);
     }
     
     /**

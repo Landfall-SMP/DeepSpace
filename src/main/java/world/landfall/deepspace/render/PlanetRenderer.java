@@ -79,12 +79,13 @@ public class PlanetRenderer {
         MESHES.clear();
         TEXTURES.clear();
         for (var x : PlanetRegistry.getAllPlanets()) {
-            MESHES.put(x.getId(),new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f()));
+            MESHES.put(x.getId(),new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f(), 1f));
             TEXTURES.put(x.getId(), Deepspace.path("textures/"+x.getId()+".png"));
             logger.info("Made mesh for planet {}",x.getName());
         }
 
     }
+
     public static void render(
             VeilRenderLevelStageEvent.Stage stage,
             LevelRenderer levelRenderer,
@@ -121,14 +122,10 @@ public class PlanetRenderer {
 
             x.getValue().render(poseStack, planetBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
             RenderSystem.setShaderTexture(0, texture);
-
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             IrisIntegration.bindPipeline();
             planetRenderType.draw(planetBuilder.buildOrThrow());
-            // Planet Atmosphere
-            BufferBuilder atmosphereBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
-            x.getValue().render(poseStack, atmosphereBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
-            RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
-            atmosphereRenderType.draw(atmosphereBuilder.buildOrThrow());
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
     }
     public static void init() {
