@@ -7,15 +7,17 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.VeilEventPlatform;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -43,38 +45,35 @@ public class SunRenderer {
         var sun = PlanetRegistry.getSun();
         MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f());
     }
+    public static void render(
+            VeilRenderLevelStageEvent.Stage stage,
+            LevelRenderer levelRenderer,
+            MultiBufferSource.BufferSource bufferSource,
+            MatrixStack matrixStack,
+            Matrix4fc frustumMatrix,
+            Matrix4fc projectionMatrix,
+            int renderTick,
+            DeltaTracker partialTicks,
+            Camera camera,
+            Frustum frustum
+    ) {
+        var instance = Minecraft.getInstance();
+        if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
+            return;
+
+        RenderType planetRenderType = planetRenderType();
+        var poseStack = matrixStack.toPoseStack();
+        BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
+        MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
+        RenderSystem.setShaderTexture(0, TEXTURE);
+
+        IrisIntegration.bindPipeline();
+        planetRenderType.draw(sunBuilder.buildOrThrow());
+        RenderSystem.restoreProjectionMatrix();
+    }
     public static void init() {
         refreshMeshes();
-        VeilEventPlatform.INSTANCE.onVeilRenderLevelStage((stage,
-                levelRenderer,
-                bufferSource,
-                matrixStack,
-                frustumMatrix,
-                projectionMatrix,
-                renderTick,
-                partialTicks,
-                camera,
-                frustum
-        ) -> {
-            var instance = Minecraft.getInstance();
-            if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
-                return;
-            if (!stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_PARTICLES)) return;
-
-            RenderType planetRenderType = planetRenderType();
-            var poseStack = matrixStack.toPoseStack();
-            BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
-            MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
-            RenderSystem.setShaderTexture(0, TEXTURE);
-            var gameRenderer = Minecraft.getInstance().gameRenderer;
-
-
-
-
-            IrisIntegration.bindPipeline();
-            planetRenderType.draw(sunBuilder.buildOrThrow());
-            RenderSystem.restoreProjectionMatrix();
-        });
+        SpaceRenderSystem.registerRenderer(SunRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_PARTICLES);
     }
     private static Matrix4f projectionMatrix(double fov, GameRenderer gameRenderer) {
         Matrix4f mat = new Matrix4f();

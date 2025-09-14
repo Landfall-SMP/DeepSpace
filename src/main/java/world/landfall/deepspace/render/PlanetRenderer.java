@@ -7,18 +7,21 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniform;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import foundry.veil.platform.VeilEventPlatform;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.integration.IrisIntegration;
@@ -82,59 +85,56 @@ public class PlanetRenderer {
         }
 
     }
-    public static void init() {
-        refreshMeshes();
-        VeilEventPlatform.INSTANCE.preVeilPostProcessing((location, pipeline, ctx) -> {
-            pipeline.getOrCreateUniform("Time").setFloat(0.0f);
-        });
-        VeilEventPlatform.INSTANCE.onVeilRenderLevelStage(
-                (stage,
-                 levelRenderer,
-                 bufferSource,
-                 matrixStack,
-                 frustumMatrix,
-                 projectionMatrix,
-                 renderTick,
-                 partialTicks,
-                 camera,
-                 frustum
-        ) -> {
-            var instance = Minecraft.getInstance();
-            if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
-                return;
-            if (stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_ENTITIES)) {
-                RenderType planetRenderType = planetRenderType();
+    public static void render(
+            VeilRenderLevelStageEvent.Stage stage,
+            LevelRenderer levelRenderer,
+            MultiBufferSource.BufferSource bufferSource,
+            MatrixStack matrixStack,
+            Matrix4fc frustumMatrix,
+            Matrix4fc projectionMatrix,
+            int renderTick,
+            DeltaTracker partialTicks,
+            Camera camera,
+            Frustum frustum
+    ) {
+        var instance = Minecraft.getInstance();
+        if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
+            return;
+        RenderType planetRenderType = planetRenderType();
 
-                RenderType atmosphereRenderType = atmosphereRenderType();
-                VeilRenderSystem.setShader(Veil.veilPath("atmosphere"));
-                var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
-                TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
-                var poseStack = matrixStack.toPoseStack();
-                var gameRenderer = Minecraft.getInstance().gameRenderer;
+        RenderType atmosphereRenderType = atmosphereRenderType();
+        VeilRenderSystem.setShader(Veil.veilPath("atmosphere"));
+        var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
+        TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
+        var poseStack = matrixStack.toPoseStack();
+        var gameRenderer = Minecraft.getInstance().gameRenderer;
 //                RenderSystem.setProjectionMatrix(projectionMatrix(
 //                        projectionMatrix.perspectiveFov(),
 //                        gameRenderer
 //                ), null);
-                for (var x : MESHES.entrySet()) {
-                    // Planet surface
-                    BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
-                    var texture = TEXTURES.get(x.getKey());
+        for (var x : MESHES.entrySet()) {
+            // Planet surface
+            BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
+            var texture = TEXTURES.get(x.getKey());
 
 
 
-                    x.getValue().render(poseStack, planetBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
-                    RenderSystem.setShaderTexture(0, texture);
+            x.getValue().render(poseStack, planetBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
+            RenderSystem.setShaderTexture(0, texture);
 
-                    IrisIntegration.bindPipeline();
-                    planetRenderType.draw(planetBuilder.buildOrThrow());
-                    // Planet Atmosphere
-                    BufferBuilder atmosphereBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
-                    x.getValue().render(poseStack, atmosphereBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
-                    RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
-                        atmosphereRenderType.draw(atmosphereBuilder.buildOrThrow());
-                }
-            }
-        });
+            IrisIntegration.bindPipeline();
+            planetRenderType.draw(planetBuilder.buildOrThrow());
+            // Planet Atmosphere
+            BufferBuilder atmosphereBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
+            x.getValue().render(poseStack, atmosphereBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
+            RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
+            atmosphereRenderType.draw(atmosphereBuilder.buildOrThrow());
+        }
+    }
+    public static void init() {
+        refreshMeshes();
+        SpaceRenderSystem.registerRenderer(PlanetRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_ENTITIES);
+
     }
     private static Matrix4f projectionMatrix(double fov, GameRenderer gameRenderer) {
         Matrix4f mat = new Matrix4f();

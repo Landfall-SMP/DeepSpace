@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import world.landfall.deepspace.dimension.SpaceDimensionType;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.PlanetRenderer;
+import world.landfall.deepspace.render.SpaceRenderSystem;
 import world.landfall.deepspace.render.SpaceSkyRenderer;
 import world.landfall.deepspace.render.SunRenderer;
 
@@ -115,9 +116,7 @@ public class Deepspace {
         public static void onClientSetup(FMLClientSetupEvent event) {
             // Initialize client events
             LOGGER.info("Deep Space mod client initialized");
-            SpaceSkyRenderer.init();
-            PlanetRenderer.init();
-            SunRenderer.init();
+            SpaceRenderSystem.init();
             LOGGER.info("Initialized renderers");
         }
     }
