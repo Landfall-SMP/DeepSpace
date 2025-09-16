@@ -85,7 +85,7 @@ public class SpaceSkyRenderer {
         var poseStack = matrixStack.toPoseStack();
         poseStack.pushPose();
         skySphere.render(poseStack, builder, new Vector3f(), new Quaternionf());
-
+        IrisIntegration.bindPipeline();
         renderType.draw(builder.buildOrThrow());
         //VeilRenderType.endGateway().draw(builder.buildOrThrow());
         bufferSource.endBatch(renderType);
@@ -94,6 +94,6 @@ public class SpaceSkyRenderer {
     }
     public static void init() {
 
-        SpaceRenderSystem.registerRenderer(SpaceSkyRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS);
+        SpaceRenderSystem.registerRenderer(SpaceSkyRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS);
     }
 }

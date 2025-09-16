@@ -54,7 +54,8 @@ public class SpacePlayerEvents {
             var jetpackComponent = jetpack.getComponents().get(JetpackItem.JetpackComponent.SUPPLIER.get());
             if (isFlying) {
                 player.getAbilities().flying = false;
-                player.setPose(Pose.FALL_FLYING);
+                if (noGravity)
+                    player.setPose(Pose.FALL_FLYING);
                 if (player.isShiftKeyDown() || player.onGround() || (jetpackComponent != null && !jetpackComponent.canFly())) {
                     player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
                     player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);

@@ -214,7 +214,10 @@ public class PlanetRegistry {
                 Level.NETHER,
                 new Vec3(200, -50, -100),
                 new Vec3(400, 150, 100),
-                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1f, Color.RED.getRGB())),
+                List.of(
+                        new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1f, Color.RED.getRGB()),
+                        new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.RINGS, 1.2f, Color.RED.getRGB())
+                ),
                 "A hellish dimension filled with lava and dangerous creatures"
             );
             registerPlanetUnsafe(nether);

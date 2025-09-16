@@ -61,20 +61,6 @@ public class PlanetRenderer {
         );
     }
 
-    private static RenderType atmosphereRenderType() {
-        var renderType = RenderType.CompositeState.builder()
-                .setShaderState(ATMOSPHERE_RENDER_TYPE)
-                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
-                .setCullState(RenderStateShard.CullStateShard.NO_CULL)
-                .createCompositeState(true);
-        return RenderType.create(
-                "atmosphere",
-                DefaultVertexFormat.NEW_ENTITY,
-                VertexFormat.Mode.TRIANGLES,
-                786432, true, false,
-                renderType
-        );
-    }
     public static void refreshMeshes() {
         MESHES.clear();
         TEXTURES.clear();
@@ -103,16 +89,7 @@ public class PlanetRenderer {
             return;
         RenderType planetRenderType = planetRenderType();
 
-        RenderType atmosphereRenderType = atmosphereRenderType();
-        VeilRenderSystem.setShader(Veil.veilPath("atmosphere"));
-        var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
-        TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
         var poseStack = matrixStack.toPoseStack();
-        var gameRenderer = Minecraft.getInstance().gameRenderer;
-//                RenderSystem.setProjectionMatrix(projectionMatrix(
-//                        projectionMatrix.perspectiveFov(),
-//                        gameRenderer
-//                ), null);
         for (var x : MESHES.entrySet()) {
             // Planet surface
             BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
@@ -130,7 +107,7 @@ public class PlanetRenderer {
     }
     public static void init() {
         refreshMeshes();
-        SpaceRenderSystem.registerRenderer(PlanetRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_ENTITIES);
+        SpaceRenderSystem.registerRenderer(PlanetRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS);
 
     }
     private static Matrix4f projectionMatrix(double fov, GameRenderer gameRenderer) {
