@@ -16,33 +16,34 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Represents a planet in the Deep Space dimension with its associated dimension and bounding box.
  */
 public class Planet {
-    public record PlanetDecoration(Type type, float scale, int color) {
-        public enum Type {
-            ATMOSPHERE("atmosphere"),
-            RINGS("rings"),
-            ASTEROIDS("asteroids");
-            public final String type;
-            private Type(String type) {
-                this.type = type;
-            }
-        }
+    public record PlanetDecoration(@NotNull String type, float scale, int color) {
+        public final static String ATMOSPHERE = "atmosphere";
+        public final static String RINGS = "rings";
+        public final static String ASTEROIDS = "asteroids";
         public static final Codec<PlanetDecoration> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                Codec.STRING.fieldOf("type").forGetter(decoration -> decoration.type.type),
+                Codec.STRING.fieldOf("type").forGetter(decoration -> decoration.type),
                 Codec.FLOAT.fieldOf("scale").forGetter(PlanetDecoration::scale),
                 Codec.INT.fieldOf("color").forGetter(PlanetDecoration::color)
-        ).apply(instance, (type, scale, color) -> new PlanetDecoration(Type.valueOf(type), scale, color)));
+        ).apply(instance, (type, scale, color) -> {
+            var decor = new PlanetDecoration(type, scale, color);
+            System.out.println("TESTING - " + decor.type);
+            return decor;
+        }));
         public static void toNetwork(@NotNull FriendlyByteBuf buffer, @NotNull PlanetDecoration decoration) {
-            buffer.writeInt(decoration.type.ordinal());
+            System.out.println(decoration.type + " " + decoration.scale + " " + decoration.color);
+            buffer.writeUtf(decoration.type);
             buffer.writeFloat(decoration.scale);
             buffer.writeInt(decoration.color);
         }
         public static PlanetDecoration fromNetwork(@NotNull FriendlyByteBuf buffer) {
-            return new PlanetDecoration(Type.values()[buffer.readInt()], buffer.readFloat(), buffer.readInt());
+            System.out.println("TESTING");
+            return new PlanetDecoration(buffer.readUtf(), buffer.readFloat(), buffer.readInt());
         }
 
     }
@@ -56,7 +57,7 @@ public class Planet {
             Codec.list(PlanetDecoration.CODEC).optionalFieldOf("decorations").forGetter(Planet::getDecorations),
             Codec.STRING.optionalFieldOf("description", "").forGetter(Planet::getDescription)
         ).apply(instance, (id, name, dimensionLocation, min, max, decorations, description) ->
-            new Planet(id, name, ResourceKey.create(Registries.DIMENSION, dimensionLocation), min, max, decorations.get(), description)
+            new Planet(id, name, ResourceKey.create(Registries.DIMENSION, dimensionLocation), min, max, decorations.orElseGet(List::of), description)
         )
     );
 

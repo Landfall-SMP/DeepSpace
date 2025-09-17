@@ -202,7 +202,7 @@ public class PlanetRegistry {
                 Level.OVERWORLD,
                 new Vec3(-100, -100, -100),
                 new Vec3(100, 100, 100),
-                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1.05f, Color.WHITE.getRGB())),
+                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.ATMOSPHERE, 1.05f, Color.WHITE.getRGB())),
                 "The main world where players spawn"
             );
             registerPlanetUnsafe(overworld);
@@ -215,8 +215,8 @@ public class PlanetRegistry {
                 new Vec3(200, -50, -100),
                 new Vec3(400, 150, 100),
                 List.of(
-                        new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1f, Color.RED.getRGB()),
-                        new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.RINGS, 1.2f, Color.RED.getRGB())
+                        new Planet.PlanetDecoration(Planet.PlanetDecoration.ATMOSPHERE, 1f, Color.RED.getRGB()),
+                        new Planet.PlanetDecoration(Planet.PlanetDecoration.RINGS, 1.2f, Color.RED.getRGB())
                 ),
                 "A hellish dimension filled with lava and dangerous creatures"
             );
@@ -229,7 +229,7 @@ public class PlanetRegistry {
                 Level.END,
                 new Vec3(-200, 100, -100),
                 new Vec3(0, 300, 100),
-                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.Type.ATMOSPHERE, 1f, Color.WHITE.getRGB())),
+                List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.ATMOSPHERE, 1f, Color.WHITE.getRGB())),
                 "The final dimension, home to the Ender Dragon"
             );
             registerPlanetUnsafe(end);

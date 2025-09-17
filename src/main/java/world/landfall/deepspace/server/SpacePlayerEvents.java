@@ -85,10 +85,12 @@ public class SpacePlayerEvents {
 
                     }
                 }
-                newVelocity.mul(.99f);
-                if (newVelocity.length() > 2) newVelocity.mul(.9f);
-                if (!keyPressed)
+
+                if (!keyPressed) {
                     newVelocity.add(new Vector3f(0, -.01f, 0));
+                    newVelocity.mul(.99f);
+                }
+                if (newVelocity.length() > 8) newVelocity.mul(.9f);
                 //player.setPos(player.getPosition(0).add(new Vec3(newVelocity.x, newVelocity.y, newVelocity.z)));
                 player.setData(ModAttatchments.JETPACK_VELOCITY, newVelocity);
                 player.setDeltaMovement(new Vec3(newVelocity.x, newVelocity.y, newVelocity.z));
