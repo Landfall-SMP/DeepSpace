@@ -53,7 +53,7 @@ in vec3 Position;
 in vec4 Color;
 in vec2 UV0;
 in ivec2 UV2;
-in vec3 Normal;
+layout(location = 5) in vec3 Normal;
 
 uniform sampler2D Sampler2;
 
@@ -61,6 +61,7 @@ uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
 uniform vec3 ChunkOffset;
 uniform int FogShape;
+uniform vec3 SunPosition;
 
 out float vertexDistance;
 out vec4 vertexColor;
@@ -71,6 +72,8 @@ void main() {
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
     vertexDistance = fog_distance(pos, FogShape);
     //vertexDistance = 1.0f/0.0f;
-    vertexColor = Color;
+    float len = length(SunPosition);
+    vertexColor = Color * vec4(clamp(dot(normalize(SunPosition - pos), Normal) + .5f + (1.0 / (len * len)), .2f, 2));
+    // vertexColor = vec4(SunPosition.xyz, 1); # visualize position
     texCoord0 = UV0;
 }

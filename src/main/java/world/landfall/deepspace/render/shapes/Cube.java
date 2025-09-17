@@ -14,7 +14,9 @@ public class Cube implements DeepSpaceRenderable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private LinkedList<Triangle> TRIANGLES = new LinkedList<>();
     private final Vector3f center;
-    public Cube(Vector3f _corner1, Vector3f _corner2, float scale) {
+    private final boolean weirdNormals;
+    public Cube(Vector3f _corner1, Vector3f _corner2, float scale, boolean weirdNormals) {
+        this.weirdNormals = weirdNormals;
         var corner1 = new Vector3f(
                 _corner1.x,
                 _corner1.y,
@@ -58,6 +60,11 @@ public class Cube implements DeepSpaceRenderable {
                             new Vector2f(0, 0),
                             new Vector2f(0, 1),
                             new Vector2f(1, 0)
+                    },
+                    new Vector3f[] {
+                            new Vector3f(0, 0, -1).rotate(x),
+                            new Vector3f(0, 0, -1).rotate(x),
+                            new Vector3f(0, 0, -1).rotate(x)
                     }
             );
             var triangle2 = new Triangle(
@@ -70,7 +77,12 @@ public class Cube implements DeepSpaceRenderable {
                             new Vector2f(1, 0),
                             new Vector2f(0, 1),
                             new Vector2f(1, 1)
-                    }
+                    },
+                    new Vector3f[] {
+                            new Vector3f(0, 0, -1).rotate(x),
+                            new Vector3f(0, 0, -1).rotate(x),
+                            new Vector3f(0, 0, -1).rotate(x)
+                }
             );
             TRIANGLES.add(triangle1);
             TRIANGLES.add(triangle2);
@@ -87,7 +99,11 @@ public class Cube implements DeepSpaceRenderable {
                 vertex.rotate(rotation);
 
                 var UV = triangle.UV[i];
-                var normal = new Vector3f(vertex).sub(center).normalize();
+                Vector3f normal;
+                if (weirdNormals)
+                    normal = new Vector3f(vertex).sub(center).normalize();
+                else
+                    normal = triangle.normals[i];
                 consumer.addVertex(vertex.x+dimensions.x(), vertex.y+dimensions.y(), vertex.z+dimensions.z(),
                         Color.WHITE.argb(),
                         UV.x, UV.y,

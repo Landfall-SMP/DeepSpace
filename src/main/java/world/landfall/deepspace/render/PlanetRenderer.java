@@ -65,7 +65,7 @@ public class PlanetRenderer {
         MESHES.clear();
         TEXTURES.clear();
         for (var x : PlanetRegistry.getAllPlanets()) {
-            MESHES.put(x.getId(),new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f(), 1f));
+            MESHES.put(x.getId(),new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f(), 1f, false));
             TEXTURES.put(x.getId(), Deepspace.path("textures/"+x.getId()+".png"));
             logger.info("Made mesh for planet {}",x.getName());
         }
@@ -95,6 +95,11 @@ public class PlanetRenderer {
             BufferBuilder planetBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
             var texture = TEXTURES.get(x.getKey());
 
+            var sun = PlanetRegistry.getSun();
+            var center = sun.getCenter();
+            VeilRenderSystem.setShader(Veil.veilPath("planet"))
+                    .getOrCreateUniform("SunPosition")
+                    .setVector(center.toVector3f().sub(camera.getPosition().toVector3f()));
 
 
             x.getValue().render(poseStack, planetBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());

@@ -28,7 +28,7 @@ import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.shapes.Cube;
 
 public class SunRenderer {
-    private static final Logger logger = LogUtils.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static Cube MESH;
     private static final ResourceLocation TEXTURE = Deepspace.path("textures/sun.png");
     private static final ResourceLocation SUN_SHADER = Veil.veilPath("sun");
@@ -50,7 +50,7 @@ public class SunRenderer {
     }
     public static void refreshMeshes() {
         var sun = PlanetRegistry.getSun();
-        MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f(), 1f);
+        MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f(), 1f, false);
     }
     public static void render(
             VeilRenderLevelStageEvent.Stage stage,
@@ -73,8 +73,13 @@ public class SunRenderer {
         BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
         MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
         RenderSystem.setShaderTexture(0, TEXTURE);
-        var overloadedColor = 70f;
-        RenderSystem.setShaderColor(overloadedColor, overloadedColor, overloadedColor, 3f);
+        var overloadedColor = 2f;
+        if (IrisIntegration.isShaderPackEnabled())
+            RenderSystem.setShaderColor(overloadedColor, overloadedColor, overloadedColor, 3f);
+        var scale = 1f;
+        if (IrisIntegration.isShaderPackEnabled())
+            scale = 1.5f;
+        VeilRenderSystem.setShader(Veil.veilPath("sun")).getOrCreateUniform("scale").setFloat(scale);
         IrisIntegration.bindPipeline();
         sunRenderType.draw(sunBuilder.buildOrThrow());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);

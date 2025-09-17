@@ -55,8 +55,8 @@ void main() {
     float value;
     if (dist_from_center < .5 && dist_from_center > .4) value = .5;
     else value = 0;
-    float scale = 240;
-    float noise_value1 = random(vec2(int(dist_from_center * scale)));
+    float scale = 24;
+    float noise_value1 = random(vec2(int(dist_from_center * scale * 10)));
     //vec4 color = vec4(noise_value3, noise_value2, noise_value1, value) * vertexColor * variation + (vec4(1, 1, 1, 0) - variation);
     //vec4 color = vec4(mod(texCoord0.xy, 1), 0, .5);
     vec4 color = vec4(1, 1, 1, value * noise_value1);

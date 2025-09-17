@@ -55,7 +55,7 @@ public class PlanetDecorationsRenderer {
             for (var decoration : decorations.get()) {
                 if (decoration.type().equals(Planet.PlanetDecoration.ATMOSPHERE))
                     ATMOSPHERE_MESHES.put(x.getId(), new Atmosphere(
-                            new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f(), decoration.scale()),
+                            new Cube(x.getBoundingBoxMin().toVector3f(), x.getBoundingBoxMax().toVector3f(), decoration.scale(), true),
                             decoration.scale(),
                             decoration.color()
                     ));

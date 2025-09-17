@@ -28,11 +28,13 @@ public class Plane implements DeepSpaceRenderable {
             );
         TRIANGLES.add(new Triangle(
                 new Vector3f[] {vertexes[0], vertexes[1], vertexes[2]},
-                new Vector2f[] {new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0)}
+                new Vector2f[] {new Vector2f(0, 0), new Vector2f(0, 1), new Vector2f(1, 0)},
+                new Vector3f[] {new Vector3f(0, 1, 0).rotate(rotation),new Vector3f(0, 1, 0).rotate(rotation),new Vector3f(0, 1, 0).rotate(rotation)}
         ));
         TRIANGLES.add(new Triangle(
                 new Vector3f[] {vertexes[1], vertexes[2], vertexes[3]},
-                new Vector2f[] {new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1)}
+                new Vector2f[] {new Vector2f(0, 1), new Vector2f(1, 0), new Vector2f(1, 1)},
+                new Vector3f[] {new Vector3f(0, 1, 0).rotate(rotation),new Vector3f(0, 1, 0).rotate(rotation),new Vector3f(0, 1, 0).rotate(rotation)}
         ));
 
     }
