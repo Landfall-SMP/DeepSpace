@@ -7,6 +7,7 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import net.minecraft.client.Camera;
@@ -35,13 +36,13 @@ import java.util.HashMap;
 public class PlanetDecorationsRenderer {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final HashMap<String, Ring> RING_MESHES = new HashMap<>();
-    private static final ResourceLocation RING_SHADER = Veil.veilPath("ring");
+    private static final ResourceLocation RING_SHADER = Deepspace.path("ring");
     private static final RenderStateShard.ShaderStateShard RING_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
         ShaderProgram shader = VeilRenderSystem.setShader(RING_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);
     });
     private static final HashMap<String, Atmosphere> ATMOSPHERE_MESHES = new HashMap<>();
-    private static final ResourceLocation ATMOSPHERE_SHADER = Veil.veilPath("atmosphere");
+    private static final ResourceLocation ATMOSPHERE_SHADER = Deepspace.path("atmosphere");
     private static final RenderStateShard.ShaderStateShard ATMOSPHERE_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
         ShaderProgram shader = VeilRenderSystem.setShader(ATMOSPHERE_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);
@@ -79,6 +80,7 @@ public class PlanetDecorationsRenderer {
                 .setShaderState(ATMOSPHERE_RENDER_TYPE)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                 .setCullState(RenderStateShard.CullStateShard.NO_CULL)
+                .setOutputState(RenderStateShard.TRANSLUCENT_TARGET)
                 .createCompositeState(true);
         return RenderType.create(
                 "atmosphere",
@@ -89,17 +91,35 @@ public class PlanetDecorationsRenderer {
         );
     }
     private static RenderType ringRenderType() {
-        var renderType = RenderType.CompositeState.builder()
+        var ringState = RenderType.CompositeState.builder()
                 .setShaderState(RING_RENDER_TYPE)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                 .setCullState(RenderStateShard.CullStateShard.NO_CULL)
+                .setOutputState(RenderStateShard.OutputStateShard.TRANSLUCENT_TARGET)
                 .createCompositeState(true);
-        return RenderType.create(
+        var ringType = RenderType.create(
                 "ring",
                 DefaultVertexFormat.NEW_ENTITY,
                 VertexFormat.Mode.TRIANGLES,
                 786432, true, false,
-                renderType
+                ringState
+        );
+        var bloomState = RenderType.CompositeState.builder()
+                .setShaderState(RING_RENDER_TYPE)
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setCullState(RenderStateShard.CullStateShard.NO_CULL)
+                .setOutputState(VeilRenderSystem.BLOOM_SHARD)
+                .createCompositeState(true);
+        var bloomType = RenderType.create(
+                "ring",
+                DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                bloomState
+        );
+        return VeilRenderType.layered(
+                ringType,
+                bloomType
         );
     }
     public static void render(
@@ -127,7 +147,7 @@ public class PlanetDecorationsRenderer {
             BufferBuilder atmosphereBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
             x.getValue().cube.render(poseStack, atmosphereBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
             var color = new Color(x.getValue().color);
-            VeilRenderSystem.setShader(Veil.veilPath("atmosphere"));
+            VeilRenderSystem.setShader(Deepspace.path("atmosphere"));
 
             var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
             TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
@@ -140,12 +160,13 @@ public class PlanetDecorationsRenderer {
             BufferBuilder ringBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
             x.getValue().mesh.render(poseStack, ringBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
             var color = new Color(x.getValue().color);
-            VeilRenderSystem.setShader(Veil.veilPath("ring"));
+            VeilRenderSystem.setShader(Deepspace.path("ring"));
 
             var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
             TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
             RenderSystem.setShaderColor(color.getRed()/256f, color.getGreen()/256f, color.getBlue()/256f, 1f);
             RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
+
             ringRenderType.draw(ringBuilder.buildOrThrow());
             RenderSystem.setShaderColor(1, 1, 1, 1);
         }

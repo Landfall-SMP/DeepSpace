@@ -10,6 +10,7 @@ import foundry.veil.Veil;
 import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
 import net.minecraft.client.Camera;
@@ -31,25 +32,42 @@ public class SunRenderer {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static Cube MESH;
     private static final ResourceLocation TEXTURE = Deepspace.path("textures/sun.png");
-    private static final ResourceLocation SUN_SHADER = Veil.veilPath("sun");
+    private static final ResourceLocation SUN_SHADER = Deepspace.path("sun");
     private static final RenderStateShard.ShaderStateShard SUN_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
         ShaderProgram shader = VeilRenderSystem.setShader(SUN_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);
     });
     private static RenderType sunRenderType() {
-        var renderType = RenderType.CompositeState.builder()
+        var sunState = RenderType.CompositeState.builder()
                 .setShaderState(SUN_RENDER_TYPE)
+                .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
                 .createCompositeState(true);
-        return RenderType.create(
+        var sunRenderType = RenderType.create(
                 "sun",
                 DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
                 VertexFormat.Mode.TRIANGLES,
                 786432, true, false,
-                renderType
+                sunState
+        );
+        var bloomState = RenderType.CompositeState.builder()
+                .setShaderState(SUN_RENDER_TYPE)
+                .setOutputState(VeilRenderSystem.BLOOM_SHARD)
+                .createCompositeState(true);
+        var bloomRenderType = RenderType.create(
+                "sun",
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                bloomState
+        );
+        return VeilRenderType.layered(
+                sunRenderType,
+                bloomRenderType
         );
     }
     public static void refreshMeshes() {
         var sun = PlanetRegistry.getSun();
+        if (sun == null) return;
         MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f(), 1f, false);
     }
     public static void render(
@@ -72,14 +90,11 @@ public class SunRenderer {
         var poseStack = matrixStack.toPoseStack();
         BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
         MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
+        VeilRenderSystem.setShader(Deepspace.path("sun"));
         RenderSystem.setShaderTexture(0, TEXTURE);
         var overloadedColor = 2f;
         if (IrisIntegration.isShaderPackEnabled())
             RenderSystem.setShaderColor(overloadedColor, overloadedColor, overloadedColor, 3f);
-        var scale = 1f;
-        if (IrisIntegration.isShaderPackEnabled())
-            scale = 1.5f;
-        VeilRenderSystem.setShader(Veil.veilPath("sun")).getOrCreateUniform("scale").setFloat(scale);
         IrisIntegration.bindPipeline();
         sunRenderType.draw(sunBuilder.buildOrThrow());
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);

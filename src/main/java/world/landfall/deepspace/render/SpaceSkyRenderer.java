@@ -45,7 +45,7 @@ import world.landfall.deepspace.render.shapes.Sphere;
 public class SpaceSkyRenderer {
     private static final Sphere skySphere = new Sphere(30, 32, 64);
     private static final ResourceLocation SPACE_SKY_TEXTURE = ResourceLocation.fromNamespaceAndPath(Deepspace.MODID, "textures/space_sky.png");
-    private static final ResourceLocation SPACE_SKY_SHADER = Veil.veilPath("space_sky");
+    private static final ResourceLocation SPACE_SKY_SHADER = Deepspace.path("space_sky");
     private static final ShaderStateShard SPACE_SKY_RENDER_TYPE = new ShaderStateShard(() -> {
         ShaderProgram shader = VeilRenderSystem.setShader(SPACE_SKY_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);

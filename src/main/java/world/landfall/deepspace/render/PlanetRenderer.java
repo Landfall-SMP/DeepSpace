@@ -37,14 +37,9 @@ public class PlanetRenderer {
 
     private static final HashMap<String, Cube> MESHES = new HashMap<>();
     private static final HashMap<String, ResourceLocation> TEXTURES = new HashMap<>();
-    private static final ResourceLocation PLANET_SHADER = Veil.veilPath("planet");
-    private static final ResourceLocation ATMOSPHERE_SHADER = Veil.veilPath("atmosphere");
+    private static final ResourceLocation PLANET_SHADER = Deepspace.path("planet");
     private static final RenderStateShard.ShaderStateShard PLANET_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
         ShaderProgram shader = VeilRenderSystem.setShader(PLANET_SHADER);
-        return VeilRenderBridge.toShaderInstance(shader);
-    });
-    private static final RenderStateShard.ShaderStateShard ATMOSPHERE_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
-        ShaderProgram shader = VeilRenderSystem.setShader(ATMOSPHERE_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);
     });
 
@@ -97,7 +92,7 @@ public class PlanetRenderer {
 
             var sun = PlanetRegistry.getSun();
             var center = sun.getCenter();
-            VeilRenderSystem.setShader(Veil.veilPath("planet"))
+            VeilRenderSystem.setShader(Deepspace.path("planet"))
                     .getOrCreateUniform("SunPosition")
                     .setVector(center.toVector3f().sub(camera.getPosition().toVector3f()));
 

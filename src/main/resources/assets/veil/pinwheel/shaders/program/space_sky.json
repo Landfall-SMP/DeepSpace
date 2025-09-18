@@ -1,7 +1,0 @@
-{
-  "fragment": "veil:space_sky",
-  "vertex": "veil:space_sky",
-  "textures": {
-    "sky_texture": "minecraft:textures/environment/end_sky.png"
-  }
-}
