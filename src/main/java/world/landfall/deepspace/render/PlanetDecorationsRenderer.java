@@ -24,6 +24,7 @@ import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.ModOptions;
 import world.landfall.deepspace.integration.IrisIntegration;
 import world.landfall.deepspace.planet.Planet;
 import world.landfall.deepspace.planet.PlanetRegistry;
@@ -90,7 +91,7 @@ public class PlanetDecorationsRenderer {
                 renderType
         );
     }
-    private static RenderType ringRenderType() {
+    private static RenderType ringBloomRenderType() {
         var ringState = RenderType.CompositeState.builder()
                 .setShaderState(RING_RENDER_TYPE)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
@@ -120,6 +121,24 @@ public class PlanetDecorationsRenderer {
         return VeilRenderType.layered(
                 ringType,
                 bloomType
+        );
+    }
+    private static RenderType ringRenderType() {
+        var ringState = RenderType.CompositeState.builder()
+                .setShaderState(RING_RENDER_TYPE)
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setCullState(RenderStateShard.CullStateShard.NO_CULL)
+                .setOutputState(RenderStateShard.OutputStateShard.TRANSLUCENT_TARGET)
+                .createCompositeState(true);
+        var ringType = RenderType.create(
+                "ring",
+                DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                ringState
+        );
+        return VeilRenderType.layered(
+                ringType
         );
     }
     public static void render(
@@ -153,7 +172,10 @@ public class PlanetDecorationsRenderer {
             TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
             RenderSystem.setShaderColor(color.getRed()/256f, color.getGreen()/256f, color.getBlue()/256f, 1f);
             RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
-            atmosphereRenderType.draw(atmosphereBuilder.buildOrThrow());
+            switch (ModOptions.options().atmosphereDetail) {
+                case NONE -> {}
+                case BASIC, EXPENSIVE -> atmosphereRenderType.draw(atmosphereBuilder.buildOrThrow());
+            }
             RenderSystem.setShaderColor(1, 1, 1, 1);
         }
         for (var x : RING_MESHES.entrySet()) {
@@ -166,8 +188,12 @@ public class PlanetDecorationsRenderer {
             TIME_UNIFORM.setFloat(camera.getPartialTickTime() + renderTick);
             RenderSystem.setShaderColor(color.getRed()/256f, color.getGreen()/256f, color.getBlue()/256f, 1f);
             RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
+            switch (ModOptions.options().atmosphereDetail) {
+                case NONE -> {}
+                case BASIC -> ringRenderType.draw(ringBuilder.buildOrThrow());
+                case EXPENSIVE -> ringBloomRenderType().draw(ringBuilder.buildOrThrow());
+            }
 
-            ringRenderType.draw(ringBuilder.buildOrThrow());
             RenderSystem.setShaderColor(1, 1, 1, 1);
         }
 

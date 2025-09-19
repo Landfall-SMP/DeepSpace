@@ -24,6 +24,7 @@ import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.ModOptions;
 import world.landfall.deepspace.integration.IrisIntegration;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.shapes.Cube;
@@ -38,6 +39,22 @@ public class SunRenderer {
         return VeilRenderBridge.toShaderInstance(shader);
     });
     private static RenderType sunRenderType() {
+        var sunState = RenderType.CompositeState.builder()
+                .setShaderState(SUN_RENDER_TYPE)
+                .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
+                .createCompositeState(true);
+        var sunRenderType = RenderType.create(
+                "sun",
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                sunState
+        );
+        return VeilRenderType.layered(
+                sunRenderType
+        );
+    }
+    private static RenderType sunBloomRenderType() {
         var sunState = RenderType.CompositeState.builder()
                 .setShaderState(SUN_RENDER_TYPE)
                 .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
@@ -96,7 +113,10 @@ public class SunRenderer {
         if (IrisIntegration.isShaderPackEnabled())
             RenderSystem.setShaderColor(overloadedColor, overloadedColor, overloadedColor, 3f);
         IrisIntegration.bindPipeline();
-        sunRenderType.draw(sunBuilder.buildOrThrow());
+        switch (ModOptions.options().atmosphereDetail) {
+            case NONE, BASIC -> sunRenderType.draw(sunBuilder.buildOrThrow());
+            case EXPENSIVE -> sunBloomRenderType().draw(sunBuilder.buildOrThrow());
+        }
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
     public static void init() {

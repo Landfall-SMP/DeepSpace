@@ -6,10 +6,14 @@ public class ModOptions {
     private static DeepspaceOptions OPTIONS;
 
     public static void init() {
-        OPTIONS = DeepspaceOptions.defaults();
+        if (OPTIONS == null)
+            OPTIONS = DeepspaceOptions.defaults();
+    }
+    public static void init(DeepspaceOptions.Detail decorationDetail, DeepspaceOptions.Detail shadingDetail) {
+        OPTIONS = new DeepspaceOptions(decorationDetail, shadingDetail);
     }
     public static DeepspaceOptions options() {
-        if (OPTIONS == null) throw new IllegalStateException("womp womp");
+        if (OPTIONS == null) throw new IllegalStateException("Options not configured !");
         return OPTIONS;
     }
 }

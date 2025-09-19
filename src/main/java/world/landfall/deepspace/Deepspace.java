@@ -115,7 +115,6 @@ public class Deepspace {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             // Initialize client events
-            ModOptions.init();
             LOGGER.info("Deep Space mod client initialized");
             SpaceRenderSystem.init();
             LOGGER.info("Initialized renderers");

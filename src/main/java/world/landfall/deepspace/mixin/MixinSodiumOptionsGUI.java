@@ -3,6 +3,7 @@ package world.landfall.deepspace.mixin;
 import com.google.common.collect.ImmutableList;
 import net.caffeinemc.mods.sodium.client.gui.SodiumOptionsGUI;
 import net.caffeinemc.mods.sodium.client.gui.options.OptionGroup;
+import net.caffeinemc.mods.sodium.client.gui.options.OptionImpact;
 import net.caffeinemc.mods.sodium.client.gui.options.OptionImpl;
 import net.caffeinemc.mods.sodium.client.gui.options.OptionPage;
 import net.caffeinemc.mods.sodium.client.gui.options.control.ControlValueFormatter;
@@ -53,7 +54,19 @@ public class MixinSodiumOptionsGUI extends Screen {
                                     DeepspaceOptions.Detail[] allowedValues = DeepspaceOptions.Detail.values();
                                     return new CyclingControl<>(option, DeepspaceOptions.Detail.class, allowedValues);
                                 })
-                                .setBinding((DeepspaceOptions options, DeepspaceOptions.Detail value) -> options.atmosphereDetail = DeepspaceOptions.Detail.values()[value.ordinal()], options -> options.atmosphereDetail)
+                                .setImpact(OptionImpact.MEDIUM)
+                                .setBinding((DeepspaceOptions options, DeepspaceOptions.Detail value) -> options.atmosphereDetail = value, options -> options.atmosphereDetail)
+                                .build()
+                ).add(
+                        OptionImpl.createBuilder(DeepspaceOptions.Detail.class, deepSpace$deepspaceOpts)
+                                .setName(Component.translatable("options.deepspace.shadingDetail"))
+                                .setTooltip(Component.translatable("options.deepspace.shadingDetail.tooltip"))
+                                .setControl(option -> {
+                                    DeepspaceOptions.Detail[] allowedValues = DeepspaceOptions.Detail.values();
+                                    return new CyclingControl<>(option, DeepspaceOptions.Detail.class, allowedValues);
+                                })
+                                .setImpact(OptionImpact.MEDIUM)
+                                .setBinding((DeepspaceOptions options, DeepspaceOptions.Detail value) -> options.shadingDetail = value, options -> options.shadingDetail)
                                 .build()
                 ).build()
         ));

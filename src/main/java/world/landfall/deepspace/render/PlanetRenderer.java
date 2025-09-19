@@ -24,6 +24,7 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.ModOptions;
 import world.landfall.deepspace.integration.IrisIntegration;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.shapes.Cube;
@@ -42,6 +43,11 @@ public class PlanetRenderer {
         ShaderProgram shader = VeilRenderSystem.setShader(PLANET_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);
     });
+    private static final ResourceLocation PLANET_UNSHADED_SHADER = Deepspace.path("planet_unshaded");
+    private static final RenderStateShard.ShaderStateShard PLANET_UNSHADED_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
+        ShaderProgram shader = VeilRenderSystem.setShader(PLANET_UNSHADED_SHADER);
+        return VeilRenderBridge.toShaderInstance(shader);
+    });
 
     public static RenderType planetRenderType() {
         var renderType = RenderType.CompositeState.builder()
@@ -49,6 +55,18 @@ public class PlanetRenderer {
                 .createCompositeState(true);
         return RenderType.create(
                 "planet",
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                renderType
+        );
+    }
+    public static RenderType planetUnshadedRenderType() {
+        var renderType = RenderType.CompositeState.builder()
+                .setShaderState(PLANET_UNSHADED_RENDER_TYPE)
+                .createCompositeState(true);
+        return RenderType.create(
+                "planet_unshaded",
                 DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
                 VertexFormat.Mode.TRIANGLES,
                 786432, true, false,
@@ -83,7 +101,7 @@ public class PlanetRenderer {
         if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
             return;
         RenderType planetRenderType = planetRenderType();
-
+        RenderType planetUnshadedRenderType = planetUnshadedRenderType();
         var poseStack = matrixStack.toPoseStack();
         for (var x : MESHES.entrySet()) {
             // Planet surface
@@ -101,7 +119,11 @@ public class PlanetRenderer {
             RenderSystem.setShaderTexture(0, texture);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             IrisIntegration.bindPipeline();
-            planetRenderType.draw(planetBuilder.buildOrThrow());
+            switch (ModOptions.options().shadingDetail) {
+                case NONE -> planetUnshadedRenderType.draw(planetBuilder.buildOrThrow());
+                case BASIC, EXPENSIVE -> planetRenderType.draw(planetBuilder.buildOrThrow());
+            }
+
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
     }

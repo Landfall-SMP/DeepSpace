@@ -22,13 +22,19 @@ public class DeepspaceOptions {
         }
     }
     public Detail atmosphereDetail;
+    public Detail shadingDetail;
 
-    private DeepspaceOptions(Detail atmosphereDetail) {
+    public DeepspaceOptions(Detail atmosphereDetail, Detail shadingDetail) {
+
         this.atmosphereDetail = atmosphereDetail;
+        this.shadingDetail = shadingDetail;
     }
-
+    public void load(Detail atmosphereDetail, Detail shadingDetail) {
+        this.atmosphereDetail = atmosphereDetail;
+        this.shadingDetail = shadingDetail;
+    }
     public static DeepspaceOptions defaults() {
-        return new DeepspaceOptions(Detail.BASIC);
+        return new DeepspaceOptions(Detail.BASIC, Detail.BASIC);
     }
 
 }
