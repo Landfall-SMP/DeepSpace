@@ -1,5 +1,9 @@
 {
   "itemGroup.deepspace": "Example Mod Tab",
-  "block.deepspace.example_block": "Example Block",
-  "item.deepspace.example_item": "Example Item"
+  "options.deepspace.decorationDetail": "Planet decorations",
+  "options.deepspace.decorationDetail.tooltip": "Level of detail for planet decorations (e.g. atmospheres, rings)",
+  "options.deepspace.decorationDetail.none": "None",
+  "options.deepspace.decorationDetail.basic": "Basic",
+  "options.deepspace.decorationDetail.expensive": "Expensive",
+  "options.deepspace.spaceOptions": "Deep Space"
 }

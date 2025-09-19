@@ -108,6 +108,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     compileOnly "foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}"
+    compileOnly ("maven.modrinth:sodium:neoforge-0.6.13+mc1.21.1")
     // Add the DH Api for compile time development
     //compileOnly "blank:DistantHorizonsApi:4.0.0"
     //compileOnly fg.deobf("blank:DistantHorizonsAPI:1.0.0") // local Jar file, file should be named in the format: "DistantHorizonsAPI-VERSION.jar" (IE "DistantHorizonsAPI-1.0.0.jar") or "DistantHorizonsAPI.jar"

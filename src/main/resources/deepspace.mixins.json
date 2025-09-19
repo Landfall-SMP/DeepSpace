@@ -4,10 +4,12 @@
   "package": "world.landfall.deepspace.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinGameRenderer"
+    "MixinGameRenderer",
+    "MixinSodiumOptionsGUI"
   ],
   "client": [
-    "MixinGameRenderer"
+    "MixinGameRenderer",
+    "MixinSodiumOptionsGUI"
   ],
   "injectors": {
     "defaultRequire": 1
