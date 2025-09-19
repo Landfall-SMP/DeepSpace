@@ -31,27 +31,33 @@ public class SpaceClientEvents {
     }
     @EventBusSubscriber(modid = Deepspace.MODID, value = Dist.CLIENT)
     public static class Tick {
-        private static int ticksSinceRocket = 0;
         @SubscribeEvent
         public static void onClientTick(PlayerTickEvent.Pre event) {
             var player = event.getEntity();
             var item = player.getItemBySlot(EquipmentSlot.CHEST);
-            if (item.is(ModItems.JETPACK_ITEM)) {
+            if (item.is(ModItems.JETPACK_ITEM) && player.level().isClientSide) {
                 var component = item.getComponents().get(JetpackItem.JetpackComponent.SUPPLIER.get());
                 if (component == null) return;
-                if (Minecraft.getInstance().options.keyJump.isDown() && component.canFly()) {
-                    PacketDistributor.sendToServer(
-                            new JetpackPacket.RocketForward()
-                    );
-                    event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, true);
-                    ticksSinceRocket = 0;
-                } else event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
+                var rocketing = Minecraft.getInstance().options.keyJump.isDown() && component.canFly();
+
+                PacketDistributor.sendToServer(
+                        new JetpackPacket.RocketForward(rocketing)
+                );
+                event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, rocketing);
+
 
                 if (ModKeyMappings.BEGIN_FLYING.get().isDown() && component.canFly()) {
                     PacketDistributor.sendToServer(
-                            new JetpackPacket.BeginFlying()
+                            new JetpackPacket.BeginFlying(true)
                     );
                     event.getEntity().setData(ModAttatchments.IS_FLYING_JETPACK, true);
+                }
+                if (Minecraft.getInstance().options.keyShift.isDown()) {
+                    PacketDistributor.sendToServer(
+                            new JetpackPacket.BeginFlying(false)
+                    );
+                    event.getEntity().setData(ModAttatchments.IS_FLYING_JETPACK, false);
+                    event.getEntity().setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
                 }
             }
         }

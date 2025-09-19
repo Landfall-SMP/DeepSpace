@@ -1,0 +1,9 @@
+{
+  "stages": [
+    {
+      "type": "veil:copy",
+      "in": "minecraft:main",
+      "out": "veil:bloom"
+    }
+  ]
+}

@@ -61,7 +61,7 @@ uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
 uniform vec3 ChunkOffset;
 uniform int FogShape;
-uniform float Time;
+uniform vec3 SunPosition;
 
 out float vertexDistance;
 out vec4 vertexColor;
@@ -69,11 +69,11 @@ out vec2 texCoord0;
 
 void main() {
     vec3 pos = Position + ChunkOffset + VeilCamera.CameraBobOffset;
-
-    gl_Position = ProjMat * ModelViewMat * (vec4(pos + Normal * 1.0, 1.0));
-
+    gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
     vertexDistance = fog_distance(pos, FogShape);
-    vertexColor = Color * minecraft_sample_lightmap(Sampler2, UV2);
-    float scale = 1.0f;
-    texCoord0 = UV0 + Time / 320;
+    //vertexDistance = 1.0f/0.0f;
+    float len = length(SunPosition);
+    vertexColor = Color * vec4(clamp(dot(normalize(SunPosition - pos), Normal) + .5f + (1.0 / (len * len)), .2f, 2));
+    // vertexColor = vec4(SunPosition.xyz, 1); # visualize position
+    texCoord0 = UV0;
 }

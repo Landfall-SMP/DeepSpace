@@ -7,66 +7,122 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import foundry.veil.Veil;
+import foundry.veil.api.client.render.MatrixStack;
 import foundry.veil.api.client.render.VeilRenderBridge;
 import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.event.VeilRenderLevelStageEvent;
-import foundry.veil.platform.VeilEventPlatform;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
-import org.joml.Vector3f;
 import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.ModOptions;
 import world.landfall.deepspace.integration.IrisIntegration;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.shapes.Cube;
 
 public class SunRenderer {
-    private static final Logger logger = LogUtils.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static Cube MESH;
     private static final ResourceLocation TEXTURE = Deepspace.path("textures/sun.png");
-    private static final ResourceLocation PLANET_SHADER = Veil.veilPath("planet");
-    private static final RenderStateShard.ShaderStateShard PLANET_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
-        ShaderProgram shader = VeilRenderSystem.setShader(PLANET_SHADER);
+    private static final ResourceLocation SUN_SHADER = Deepspace.path("sun");
+    private static final RenderStateShard.ShaderStateShard SUN_RENDER_TYPE = new RenderStateShard.ShaderStateShard(() -> {
+        ShaderProgram shader = VeilRenderSystem.setShader(SUN_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);
     });
-    private static RenderType planetRenderType() {
-        return PlanetRenderer.planetRenderType();
+    private static RenderType sunRenderType() {
+        var sunState = RenderType.CompositeState.builder()
+                .setShaderState(SUN_RENDER_TYPE)
+                .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
+                .createCompositeState(true);
+        var sunRenderType = RenderType.create(
+                "sun",
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                sunState
+        );
+        return VeilRenderType.layered(
+                sunRenderType
+        );
+    }
+    private static RenderType sunBloomRenderType() {
+        var sunState = RenderType.CompositeState.builder()
+                .setShaderState(SUN_RENDER_TYPE)
+                .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
+                .createCompositeState(true);
+        var sunRenderType = RenderType.create(
+                "sun",
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                sunState
+        );
+        var bloomState = RenderType.CompositeState.builder()
+                .setShaderState(SUN_RENDER_TYPE)
+                .setOutputState(VeilRenderSystem.BLOOM_SHARD)
+                .createCompositeState(true);
+        var bloomRenderType = RenderType.create(
+                "sun",
+                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+                VertexFormat.Mode.TRIANGLES,
+                786432, true, false,
+                bloomState
+        );
+        return VeilRenderType.layered(
+                sunRenderType,
+                bloomRenderType
+        );
     }
     public static void refreshMeshes() {
         var sun = PlanetRegistry.getSun();
-        MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f());
+        if (sun == null) return;
+        MESH = new Cube(sun.getBoundingBoxMin().toVector3f(), sun.getBoundingBoxMax().toVector3f(), 1f, false);
+    }
+    public static void render(
+            VeilRenderLevelStageEvent.Stage stage,
+            LevelRenderer levelRenderer,
+            MultiBufferSource.BufferSource bufferSource,
+            MatrixStack matrixStack,
+            Matrix4fc frustumMatrix,
+            Matrix4fc projectionMatrix,
+            int renderTick,
+            DeltaTracker partialTicks,
+            Camera camera,
+            Frustum frustum
+    ) {
+        var instance = Minecraft.getInstance();
+        if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
+            return;
+
+        RenderType sunRenderType = sunRenderType();
+        var poseStack = matrixStack.toPoseStack();
+        BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
+        MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
+        VeilRenderSystem.setShader(Deepspace.path("sun"));
+        RenderSystem.setShaderTexture(0, TEXTURE);
+        var overloadedColor = 2f;
+        if (IrisIntegration.isShaderPackEnabled())
+            RenderSystem.setShaderColor(overloadedColor, overloadedColor, overloadedColor, 3f);
+        IrisIntegration.bindPipeline();
+        switch (ModOptions.options().atmosphereDetail) {
+            case NONE, BASIC -> sunRenderType.draw(sunBuilder.buildOrThrow());
+            case EXPENSIVE -> sunBloomRenderType().draw(sunBuilder.buildOrThrow());
+        }
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
     public static void init() {
         refreshMeshes();
-        VeilEventPlatform.INSTANCE.onVeilRenderLevelStage((stage,
-                levelRenderer,
-                bufferSource,
-                matrixStack,
-                frustumMatrix,
-                projectionMatrix,
-                renderTick,
-                partialTicks,
-                camera,
-                frustum
-        ) -> {
-            var instance = Minecraft.getInstance();
-            if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
-                return;
-            if (!stage.equals(VeilRenderLevelStageEvent.Stage.AFTER_PARTICLES)) return;
-
-            RenderType planetRenderType = planetRenderType();
-            var poseStack = matrixStack.toPoseStack();
-            BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
-            MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
-            RenderSystem.setShaderTexture(0, TEXTURE);
-            IrisIntegration.bindPipeline();
-            planetRenderType.draw(sunBuilder.buildOrThrow());
-
-        });
+        SpaceRenderSystem.registerRenderer(SunRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS);
     }
+
 
 }

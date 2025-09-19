@@ -3,10 +3,13 @@
   "minVersion": "0.8",
   "package": "world.landfall.deepspace.mixin",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "deepspace.refmap.json",
   "mixins": [
+    "MixinGameRenderer",
+    "MixinSodiumOptionsGUI"
   ],
   "client": [
+    "MixinGameRenderer",
+    "MixinSodiumOptionsGUI"
   ],
   "injectors": {
     "defaultRequire": 1

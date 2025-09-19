@@ -1,6 +1,6 @@
 {
-  "fragment": "veil:space_sky",
-  "vertex": "veil:space_sky",
+  "fragment": "deepspace:planet",
+  "vertex": "deepspace:planet_unshaded",
   "textures": {
     "sky_texture": "minecraft:textures/environment/end_sky.png"
   }
