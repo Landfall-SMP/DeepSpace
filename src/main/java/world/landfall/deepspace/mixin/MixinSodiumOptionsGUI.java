@@ -70,7 +70,6 @@ public class MixinSodiumOptionsGUI extends Screen {
                                 .build()
                 ).build()
         ));
-        System.out.println("verified!");
         pages.add(deepSpace$spaceOptionsPage);
     }
 }

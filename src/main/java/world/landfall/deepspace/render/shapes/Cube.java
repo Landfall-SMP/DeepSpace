@@ -34,14 +34,15 @@ public class Cube implements DeepSpaceRenderable {
         Vector3f diff = new Vector3f(corner1).sub(corner2).div(2);
         Quaternionf[] rotations = new Quaternionf[] {
                 new Quaternionf(),
-                new Quaternionf().rotateLocalX((float)Math.PI/2),
-                new Quaternionf().rotateLocalX(-(float)Math.PI/2),
-                new Quaternionf().rotateLocalX((float)Math.PI),
                 new Quaternionf().rotateLocalY((float)Math.PI/2),
-                new Quaternionf().rotateLocalY(-(float)Math.PI/2)
+                new Quaternionf().rotateLocalY((float)Math.PI),
+                new Quaternionf().rotateLocalY((float)Math.PI*1.5f),
+                new Quaternionf().rotateLocalX((float)Math.PI/2),
+                new Quaternionf().rotateLocalX(-(float)Math.PI/2)
         };
         diff.mul(scale);
         for (var x : rotations) {
+
             Vector3f[] vertexes = new Vector3f[] {
                     new Vector3f(diff.x, diff.y, diff.z),
                     new Vector3f(diff.x, -diff.y, diff.z),
