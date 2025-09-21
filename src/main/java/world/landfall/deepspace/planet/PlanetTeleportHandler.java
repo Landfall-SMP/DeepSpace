@@ -62,7 +62,7 @@ public class PlanetTeleportHandler {
         var height = level.getHeight();
 
         if (player.position().y > height + SPACE_DISTANCE_FROM_CEILING && planet != null) {
-            LOGGER.info("Teleporting");
+            LOGGER.info("Teleporting player {} to planet {}", player.getDisplayName().getString(), planet.getName());
             var pos = getSafePlanetExitLocation(planet);
             player.teleportTo(
                     player.getServer().getLevel(

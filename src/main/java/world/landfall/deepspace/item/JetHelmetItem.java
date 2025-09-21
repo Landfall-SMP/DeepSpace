@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -37,6 +38,7 @@ public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
         super(ArmorMaterials.IRON, Type.HELMET,new Properties()
                 .durability(-1)
                 .component(JetHelmetComponent.SUPPLIER, new JetHelmetComponent(100, 100))
+                .component(DataComponents.RARITY, Rarity.EPIC)
         );
 
     }

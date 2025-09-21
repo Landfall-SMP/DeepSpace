@@ -7,5 +7,7 @@
   "options.deepspace.decorationDetail.expensive": "Expensive",
   "options.deepspace.spaceOptions": "Deep Space",
   "options.deepspace.shadingDetail": "Planet Shading",
-  "options.deepspace.shadingDetail.tooltip": "Level of detail for planet shading (e.g. shadows, bloom)"
+  "options.deepspace.shadingDetail.tooltip": "Level of detail for planet shading (e.g. shadows, bloom)",
+  "item.deepspace.jetpack": "Jetpack",
+  "item.deepspace.jetpack.tooltip": "Fuel remaining: "
 }

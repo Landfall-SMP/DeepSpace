@@ -89,7 +89,6 @@ public class Cube implements DeepSpaceRenderable {
             TRIANGLES.add(triangle2);
 
         }
-        LOGGER.info("Made {} triangles",TRIANGLES.size());
     }
     @Override
     public void render(PoseStack stack, VertexConsumer consumer, Vector3fc dimensions, Quaternionf rotation) {
