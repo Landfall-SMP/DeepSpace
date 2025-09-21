@@ -3,13 +3,6 @@ package world.landfall.deepspace.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
@@ -28,7 +21,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.landfall.deepspace.Deepspace;
-import world.landfall.deepspace.model.JetSuitArmorModel;
 
 import java.awt.*;
 import java.util.function.Supplier;
@@ -87,10 +79,10 @@ public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
         return ResourceLocation.parse("minecraft:block/glass");
     }
 
-    @Override
-    public @NotNull Model getGenericArmorModel(@NotNull LivingEntity livingEntity, @NotNull ItemStack itemStack, @NotNull EquipmentSlot equipmentSlot, @NotNull HumanoidModel<?> original) {
-        return new JetSuitArmorModel<Player>(original.head);
-    }
+//    @Override
+//    public @NotNull Model getGenericArmorModel(@NotNull LivingEntity livingEntity, @NotNull ItemStack itemStack, @NotNull EquipmentSlot equipmentSlot, @NotNull HumanoidModel<?> original) {
+//        return new JetSuitArmorModel<Player>(original.head);
+//    }
 
     public record JetHelmetComponent(int currentOxygen, int maxOxygen) {
 
