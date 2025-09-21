@@ -25,7 +25,7 @@ import world.landfall.deepspace.Deepspace;
 import java.awt.*;
 import java.util.function.Supplier;
 
-public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
+public class JetHelmetItem extends ArmorItem {
     public JetHelmetItem() {
         super(ArmorMaterials.IRON, Type.HELMET,new Properties()
                 .durability(-1)
