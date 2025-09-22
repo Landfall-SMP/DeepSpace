@@ -66,6 +66,9 @@ public class Sun {
     public boolean isPlayerTouching(@NotNull Player player) {
         //return isWithinBounds(player.position()) || isWithinBounds(player.position().add(0, 2, 0));
         Objects.requireNonNull(player);
+        var level = player.level();
+        if (!level.dimension().location().equals(ResourceLocation.parse("deepspace:space")))
+            return false;
         var position = player.position();
         return position.x >= boundingBoxMin.x - .5 && position.x <= boundingBoxMax.x + .5 &&
                 position.y >= boundingBoxMin.y - 2 && position.y <= boundingBoxMax.y &&
