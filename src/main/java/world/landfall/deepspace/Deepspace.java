@@ -1,12 +1,9 @@
 package world.landfall.deepspace;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,10 +22,7 @@ import org.slf4j.Logger;
 
 import world.landfall.deepspace.dimension.SpaceDimensionType;
 import world.landfall.deepspace.planet.PlanetRegistry;
-import world.landfall.deepspace.render.PlanetRenderer;
 import world.landfall.deepspace.render.SpaceRenderSystem;
-import world.landfall.deepspace.render.SpaceSkyRenderer;
-import world.landfall.deepspace.render.SunRenderer;
 
 import java.util.Objects;
 
@@ -64,7 +58,6 @@ public class Deepspace {
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModAttatchments.register(modEventBus);
-
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);
 
