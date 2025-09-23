@@ -108,7 +108,7 @@ public class JetHelmetItem extends ArmorItem {
     @Override
     public int getBarColor(ItemStack stack) {
         var component = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
-        return (component != null && component.playerOxygen() > 3) ? Color.WHITE.getRGB() : Color.RED.getRGB();
+        return (component != null && component.playerOxygen() > 100) ? Color.WHITE.getRGB() : Color.RED.getRGB();
     }
 
     @Override
