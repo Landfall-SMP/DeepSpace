@@ -17,6 +17,14 @@ repositories {
         name = "Modrinth"
         url = "https://api.modrinth.com/maven"
     }
+    maven {
+        name = "Createmod"
+        url = "https://maven.createmod.net"
+    } // Create, Ponder, Flywheel
+    maven {
+        name = "iThundxr"
+        url = "https://maven.ithundxr.dev/snapshots"
+    } // Registrate
     // define the local folder to search
     // (this directory is relative to the project's root)
     flatDir { dir 'libs' }
@@ -110,6 +118,14 @@ dependencies {
     compileOnly "foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}"
     compileOnly ("maven.modrinth:sodium:neoforge-0.6.13+mc1.21.1")
     compileOnly "org.lwjgl:lwjgl:3.3.3"
+
+    // Create mod
+    implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false }
+    implementation("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
+    runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
+    implementation("com.tterrag.registrate:Registrate:${registrate_version}")
+
     // Add the DH Api for compile time development
     //compileOnly "blank:DistantHorizonsApi:4.0.0"
     //compileOnly fg.deobf("blank:DistantHorizonsAPI:1.0.0") // local Jar file, file should be named in the format: "DistantHorizonsAPI-VERSION.jar" (IE "DistantHorizonsAPI-1.0.0.jar") or "DistantHorizonsAPI.jar"

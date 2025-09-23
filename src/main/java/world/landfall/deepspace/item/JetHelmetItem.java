@@ -2,18 +2,26 @@ package world.landfall.deepspace.item;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.simibubi.create.Create;
+import com.simibubi.create.foundation.data.TagGen;
+import com.simibubi.create.infrastructure.data.CreateRegistrateTags;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagBuilder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -31,10 +39,20 @@ public class JetHelmetItem extends ArmorItem {
                 .durability(-1)
                 .component(JetHelmetComponent.SUPPLIER, new JetHelmetComponent(100, 100))
                 .component(DataComponents.RARITY, Rarity.EPIC)
+                .component(DataComponents.CUSTOM_DATA, CustomData.of(
+                        createModTag()
+                ))
         );
 
     }
+    private static CompoundTag createModTag() {
+        var createTag = new CompoundTag();
+        var data = new CompoundTag();
+        data.put("Processing", StringTag.valueOf("BLASTING"));
+        createTag.put("CreateData", data);
+        return createTag;
 
+    }
     @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;

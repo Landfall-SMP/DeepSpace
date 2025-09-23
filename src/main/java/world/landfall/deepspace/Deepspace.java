@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import world.landfall.deepspace.dimension.SpaceDimensionType;
+import world.landfall.deepspace.integration.CreateIntegration;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.SpaceRenderSystem;
 
@@ -58,6 +59,7 @@ public class Deepspace {
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModAttatchments.register(modEventBus);
+        CreateIntegration.register(modEventBus);
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);
 

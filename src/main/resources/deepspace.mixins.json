@@ -4,6 +4,9 @@
   "package": "world.landfall.deepspace.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinAirCurrent",
+    "MixinAllFanProcessingTypes",
+    "MixinDepotBehavior",
     "MixinGameRenderer",
     "MixinSodiumOptionsGUI"
   ],
