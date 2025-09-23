@@ -12,6 +12,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import world.landfall.deepspace.Deepspace;
 
 import java.awt.*;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class JetHelmetItem extends ArmorItem {
@@ -54,6 +57,16 @@ public class JetHelmetItem extends ArmorItem {
 
     }
     @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<net.minecraft.network.chat.Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        //super.appendHoverText(stack, contexttranslatable("item.deepspace.jetpack.tooltip"), tooltipComponents, tooltipFlag);
+        var jetHelmetComponent = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
+        if (jetHelmetComponent == null) return;
+        if (jetHelmetComponent.maxOxygen < 0)
+            tooltipComponents.add(net.minecraft.network.chat.Component.translatable("item.deepspace.jet_helmet.tooltip").append(net.minecraft.network.chat.Component.literal("Infinite").setStyle(Style.EMPTY.withColor(0xFF00FFE))));
+        else
+            tooltipComponents.add(net.minecraft.network.chat.Component.translatable("item.deepspace.jet_helmet.tooltip").append(Component.literal(jetHelmetComponent.currentOxygen + "/" + jetHelmetComponent.maxOxygen)));
+    }
+    @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;
     }
@@ -74,6 +87,12 @@ public class JetHelmetItem extends ArmorItem {
 
     }
 
+    @Override
+    public Component getName(ItemStack stack) {
+        return (stack.has(JetHelmetComponent.SUPPLIER) && stack.get(JetHelmetComponent.SUPPLIER.get()).maxOxygen >= 0) ?
+                Component.translatable("item.deepspace.jet_helmet") :
+                Component.translatable("item.deepspace.jet_helmet.creative");
+    }
     @Override
     public boolean isBarVisible(ItemStack stack) {
         var component = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());

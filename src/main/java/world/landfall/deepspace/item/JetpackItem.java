@@ -51,6 +51,12 @@ public class JetpackItem extends Item implements Equipable {
         );
     }
 
+    @Override
+    public Component getName(ItemStack stack) {
+        return (stack.has(JetpackComponent.SUPPLIER) && stack.get(JetpackComponent.SUPPLIER.get()).maxFuel >= 0) ?
+        Component.translatable("item.deepspace.jetpack") :
+        Component.translatable("item.deepspace.jetpack.creative");
+    }
 
     @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {

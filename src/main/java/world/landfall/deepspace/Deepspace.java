@@ -2,6 +2,7 @@ package world.landfall.deepspace;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.api.distmarker.Dist;
@@ -26,6 +27,7 @@ import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.SpaceRenderSystem;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 @Mod(Deepspace.MODID)
 public class Deepspace {
@@ -34,7 +36,18 @@ public class Deepspace {
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-
+    public static final Supplier<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("deepspace", () -> CreativeModeTab.builder()
+            .displayItems((params, output) -> {
+                output.accept(ModItems.JETPACK_ITEM);
+                output.accept(ModItems.CREATIVE_JETPACK_ITEM.get());
+                output.accept(ModItems.JET_HELMET_ITEM);
+                output.accept(ModItems.CREATIVE_JET_HELMET_ITEM.get());
+                output.accept(ModItems.ANGEL_BLOCK_ITEM);
+                output.accept(ModItems.ROCKET_BOOSTER_ITEM);
+            })
+            .icon(ModItems.ANGEL_BLOCK_ITEM::toStack)
+            .title(Component.translatable("menu.deepspace.creative_mode_tab"))
+            .build());
     // The constructor for the mod class is the first code that is run when your mod is loaded.
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Deepspace(@NotNull IEventBus modEventBus, @NotNull ModContainer modContainer) {
