@@ -60,8 +60,9 @@ public class PlanetTeleportHandler {
         var closestPlanet = PlanetUtils.getNearestPlanet(player.position());
         var dimension = level.dimension().location();
         var height = level.getHeight();
+
         if (player.position().y > height + SPACE_DISTANCE_FROM_CEILING && planet != null) {
-            LOGGER.info("Teleporting");
+            LOGGER.info("Teleporting player {} to planet {}", player.getDisplayName().getString(), planet.getName());
             var pos = getSafePlanetExitLocation(planet);
             player.teleportTo(
                     player.getServer().getLevel(
@@ -76,9 +77,37 @@ public class PlanetTeleportHandler {
             );
         } else if (closestPlanet!=null&&dimension.equals(ResourceLocation.parse("deepspace:space")) && (closestPlanet.isPlayerTouching(player))) {
             var newLevel = player.getServer().getLevel(closestPlanet.getDimension());
+            var playerPos = player.position();
+            var planetPos = closestPlanet.getCenter();
+            var relativePos = planetPos.subtract(playerPos);
+            var planetRadius = (float)Math.abs(closestPlanet.getBoundingBoxMin().x - planetPos.x);
+            var pRadius = (float)Math.sqrt(relativePos.x * relativePos.x + relativePos.y * relativePos.y + relativePos.z * relativePos.z);
+            var pAzimuth = (float)Math.atan2(relativePos.z,relativePos.x);
+            var pTheta = (float)Math.acos(relativePos.y/pRadius);
+            var levelRadius = (float)level.getWorldBorder().getDistanceToBorder(0, 0);
+            float[] finalPos;
+            if (pTheta > Math.PI * .75) {
+                // top
+                finalPos = new float[] {(float)relativePos.x / planetRadius, -(float)relativePos.z / planetRadius};
+            } else if (pTheta < Math.PI * .25) {
+                // bottom
+                finalPos = new float[] {-(float)relativePos.x / planetRadius, (float)relativePos.z / planetRadius};
+            } else {
+                // mid
+                if (pAzimuth - Math.PI/4 < -Math.PI || pAzimuth - Math.PI/4 > Math.PI / 2) {
+                    finalPos = new float[]{(float) relativePos.z / planetRadius, -(float) relativePos.y / planetRadius};
+                } else if (pAzimuth - Math.PI/4 < -Math.PI / 2) {
+                    finalPos = new float[]{-(float) relativePos.x / planetRadius, -(float) relativePos.y / planetRadius};
+                } else if (pAzimuth - Math.PI/4 < 0) {
+                    finalPos = new float[]{-(float) relativePos.z / planetRadius, -(float) relativePos.y / planetRadius};
+                } else {
+                    finalPos = new float[]{(float) relativePos.x / planetRadius, -(float) relativePos.y / planetRadius};
+                }
+            }
+
             player.teleportTo(
                     newLevel,
-                    0, newLevel.getHeight(), 0,
+                    finalPos[0] * levelRadius, newLevel.getHeight(), finalPos[1] * levelRadius,
                     Set.of(),
                     0, 0
             );

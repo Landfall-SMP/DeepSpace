@@ -2,24 +2,28 @@ package world.landfall.deepspace.item;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.simibubi.create.Create;
+import com.simibubi.create.foundation.data.TagGen;
+import com.simibubi.create.infrastructure.data.CreateRegistrateTags;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagBuilder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
@@ -27,20 +31,41 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.landfall.deepspace.Deepspace;
-import world.landfall.deepspace.model.JetSuitArmorModel;
 
 import java.awt.*;
+import java.util.List;
 import java.util.function.Supplier;
 
-public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
+public class JetHelmetItem extends ArmorItem {
     public JetHelmetItem() {
         super(ArmorMaterials.IRON, Type.HELMET,new Properties()
                 .durability(-1)
                 .component(JetHelmetComponent.SUPPLIER, new JetHelmetComponent(100, 100))
+                .component(DataComponents.RARITY, Rarity.EPIC)
+                .component(DataComponents.CUSTOM_DATA, CustomData.of(
+                        createModTag()
+                ))
         );
 
     }
+    private static CompoundTag createModTag() {
+        var createTag = new CompoundTag();
+        var data = new CompoundTag();
+        data.put("Processing", StringTag.valueOf("BLASTING"));
+        createTag.put("CreateData", data);
+        return createTag;
 
+    }
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<net.minecraft.network.chat.Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        //super.appendHoverText(stack, contexttranslatable("item.deepspace.jetpack.tooltip"), tooltipComponents, tooltipFlag);
+        var jetHelmetComponent = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
+        if (jetHelmetComponent == null) return;
+        if (jetHelmetComponent.maxOxygen < 0)
+            tooltipComponents.add(net.minecraft.network.chat.Component.translatable("item.deepspace.jet_helmet.tooltip").append(net.minecraft.network.chat.Component.literal("Infinite").setStyle(Style.EMPTY.withColor(0xFF00FFE))));
+        else
+            tooltipComponents.add(net.minecraft.network.chat.Component.translatable("item.deepspace.jet_helmet.tooltip").append(Component.literal(jetHelmetComponent.currentOxygen + "/" + jetHelmetComponent.maxOxygen)));
+    }
     @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;
@@ -63,6 +88,12 @@ public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
     }
 
     @Override
+    public Component getName(ItemStack stack) {
+        return (stack.has(JetHelmetComponent.SUPPLIER) && stack.get(JetHelmetComponent.SUPPLIER.get()).maxOxygen >= 0) ?
+                Component.translatable("item.deepspace.jet_helmet") :
+                Component.translatable("item.deepspace.jet_helmet.creative");
+    }
+    @Override
     public boolean isBarVisible(ItemStack stack) {
         var component = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
         return component != null && component.maxOxygen >= 0;
@@ -77,7 +108,7 @@ public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
     @Override
     public int getBarColor(ItemStack stack) {
         var component = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
-        return (component != null && component.playerOxygen() > 3) ? Color.WHITE.getRGB() : Color.RED.getRGB();
+        return (component != null && component.playerOxygen() > 100) ? Color.WHITE.getRGB() : Color.RED.getRGB();
     }
 
     @Override
@@ -85,10 +116,10 @@ public class JetHelmetItem extends ArmorItem implements IClientItemExtensions {
         return ResourceLocation.parse("minecraft:block/glass");
     }
 
-    @Override
-    public @NotNull Model getGenericArmorModel(@NotNull LivingEntity livingEntity, @NotNull ItemStack itemStack, @NotNull EquipmentSlot equipmentSlot, @NotNull HumanoidModel<?> original) {
-        return new JetSuitArmorModel<Player>(original.head);
-    }
+//    @Override
+//    public @NotNull Model getGenericArmorModel(@NotNull LivingEntity livingEntity, @NotNull ItemStack itemStack, @NotNull EquipmentSlot equipmentSlot, @NotNull HumanoidModel<?> original) {
+//        return new JetSuitArmorModel<Player>(original.head);
+//    }
 
     public record JetHelmetComponent(int currentOxygen, int maxOxygen) {
 

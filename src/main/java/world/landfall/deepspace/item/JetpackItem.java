@@ -7,7 +7,10 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +18,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -32,6 +37,8 @@ import world.landfall.deepspace.ModAttatchments;
 import world.landfall.deepspace.ModKeyMappings;
 
 import java.awt.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 @EventBusSubscriber(modid = Deepspace.MODID)
 public class JetpackItem extends Item implements Equipable {
@@ -40,9 +47,16 @@ public class JetpackItem extends Item implements Equipable {
         super(new Properties()
                 .durability(-1)
                 .component(JetpackComponent.SUPPLIER, new JetpackComponent(100, 100))
+                .component(DataComponents.RARITY, Rarity.EPIC)
         );
     }
 
+    @Override
+    public Component getName(ItemStack stack) {
+        return (stack.has(JetpackComponent.SUPPLIER) && stack.get(JetpackComponent.SUPPLIER.get()).maxFuel >= 0) ?
+        Component.translatable("item.deepspace.jetpack") :
+        Component.translatable("item.deepspace.jetpack.creative");
+    }
 
     @Override
     public @NotNull EquipmentSlot getEquipmentSlot() {
@@ -57,7 +71,9 @@ public class JetpackItem extends Item implements Equipable {
         if (!(entity instanceof Player player)) return;
 
         var tick = player.tickCount;
-        if (!(player.getData(ModAttatchments.IS_FLYING_JETPACK) && player.getData(ModAttatchments.IS_ROCKETING_FORWARD)))
+
+        var inSlot = slotId == 38;
+        if (!player.getData(ModAttatchments.IS_FLYING_JETPACK) || !player.getData(ModAttatchments.IS_ROCKETING_FORWARD) || !inSlot)
             return;
         if (tick % 5 == 0) {
             player.level().playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, .1f, .5f);
@@ -71,6 +87,17 @@ public class JetpackItem extends Item implements Equipable {
         }
 
 
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        //super.appendHoverText(stack, contexttranslatable("item.deepspace.jetpack.tooltip"), tooltipComponents, tooltipFlag);
+        var jetpackComponent = stack.getComponents().get(JetpackComponent.SUPPLIER.get());
+        if (jetpackComponent == null) return;
+        if (jetpackComponent.maxFuel < 0)
+            tooltipComponents.add(Component.translatable("item.deepspace.jetpack.tooltip").append(Component.literal("Infinite").setStyle(Style.EMPTY.withColor(0xFF00FFE))));
+        else
+            tooltipComponents.add(Component.translatable("item.deepspace.jetpack.tooltip").append(Component.literal(jetpackComponent.currentFuel + "/" + jetpackComponent.maxFuel)));
     }
 
     @Override

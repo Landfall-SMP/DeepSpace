@@ -45,21 +45,19 @@ public class SpacePlayerEvents {
 //        }
             //player.setSwimming(isFlying);
 
-            if (!hasJetpack) {
-                player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
-                player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
-                player.setData(ModAttatchments.JETPACK_VELOCITY, new Vector3f());
-                return;
-            }
+
             var jetpackComponent = jetpack.getComponents().get(JetpackItem.JetpackComponent.SUPPLIER.get());
             if (isFlying) {
                 player.getAbilities().flying = false;
                 if (noGravity)
                     player.setPose(Pose.FALL_FLYING);
-                if (player.isShiftKeyDown() || player.onGround() || (jetpackComponent != null && !jetpackComponent.canFly())) {
+                if (player.isShiftKeyDown() || player.onGround()) {
                     player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
                     player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
                     player.setData(ModAttatchments.JETPACK_VELOCITY, new Vector3f());
+                    return;
+                } else if ((jetpackComponent != null && !jetpackComponent.canFly())) {
+
                     return;
                 }
                 var lookAngle = player.getLookAngle();
