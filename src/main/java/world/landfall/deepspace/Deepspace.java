@@ -69,6 +69,7 @@ public class Deepspace {
         // Register the Deferred Register to the mod event bus so blocks get registered
         ModBlocks.register(modEventBus);
         // Register the Deferred Register to the mod event bus so items get registered
+        ModArmorMaterials.register(modEventBus);
         ModItems.register(modEventBus);
         ModBlockEntities.register(modEventBus);
         ModAttatchments.register(modEventBus);

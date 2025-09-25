@@ -31,6 +31,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.landfall.deepspace.Deepspace;
+import world.landfall.deepspace.ModArmorMaterials;
 
 import java.awt.*;
 import java.util.List;
@@ -38,7 +39,7 @@ import java.util.function.Supplier;
 
 public class JetHelmetItem extends ArmorItem {
     public JetHelmetItem() {
-        super(ArmorMaterials.IRON, Type.HELMET,new Properties()
+        super(ModArmorMaterials.JET_ARMOR_MATERIAL, Type.HELMET,new Properties()
                 .durability(-1)
                 .component(JetHelmetComponent.SUPPLIER, new JetHelmetComponent(100, 100))
                 .component(DataComponents.RARITY, Rarity.EPIC)
@@ -111,10 +112,7 @@ public class JetHelmetItem extends ArmorItem {
         return (component != null && component.playerOxygen() > 100) ? Color.WHITE.getRGB() : Color.RED.getRGB();
     }
 
-    @Override
-    public @Nullable ResourceLocation getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, ArmorMaterial.Layer layer, boolean innerModel) {
-        return ResourceLocation.parse("minecraft:block/glass");
-    }
+
 
 //    @Override
 //    public @NotNull Model getGenericArmorModel(@NotNull LivingEntity livingEntity, @NotNull ItemStack itemStack, @NotNull EquipmentSlot equipmentSlot, @NotNull HumanoidModel<?> original) {
