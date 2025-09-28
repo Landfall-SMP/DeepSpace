@@ -15,9 +15,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.DimensionSpecialEffectsManager;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import world.landfall.deepspace.dimension.SpaceDimensionEffects;
 import world.landfall.deepspace.dimension.SpaceDimensionType;
 
