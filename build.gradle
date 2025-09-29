@@ -10,6 +10,16 @@ group = mod_group_id
 
 repositories {
     maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+    maven {
         name = 'BlameJared Maven (CrT / Bookshelf)'
         url = 'https://maven.blamejared.com'
     }
@@ -126,6 +136,7 @@ dependencies {
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
+    implementation "mezz.jei:jei-${project.minecraft_version}-common-api:${jei_version}"
     // Add the DH Api for compile time development
     //compileOnly "blank:DistantHorizonsApi:4.0.0"
     //compileOnly fg.deobf("blank:DistantHorizonsAPI:1.0.0") // local Jar file, file should be named in the format: "DistantHorizonsAPI-VERSION.jar" (IE "DistantHorizonsAPI-1.0.0.jar") or "DistantHorizonsAPI.jar"

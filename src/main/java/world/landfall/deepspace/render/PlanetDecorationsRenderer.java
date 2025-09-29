@@ -160,6 +160,7 @@ public class PlanetDecorationsRenderer {
         var ringRenderType = ringRenderType();
         var poseStack = matrixStack.toPoseStack();
         IrisIntegration.bindPipeline();
+
         for (var x : ATMOSPHERE_MESHES.entrySet()) {
 
             // Planet Atmosphere

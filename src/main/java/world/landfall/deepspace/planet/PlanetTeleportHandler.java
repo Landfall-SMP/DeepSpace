@@ -16,6 +16,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -84,7 +85,9 @@ public class PlanetTeleportHandler {
             var pRadius = (float)Math.sqrt(relativePos.x * relativePos.x + relativePos.y * relativePos.y + relativePos.z * relativePos.z);
             var pAzimuth = (float)Math.atan2(relativePos.z,relativePos.x);
             var pTheta = (float)Math.acos(relativePos.y/pRadius);
-            var levelRadius = (float)level.getWorldBorder().getDistanceToBorder(0, 0);
+            var levelRadius = Math.abs(closestPlanet.getPhysicalMin().x - closestPlanet.getPhysicalMax().x)/2f;
+            var levelCenter = new Vec3((closestPlanet.getPhysicalMin().x + closestPlanet.getPhysicalMax().x) / 2, 0, (closestPlanet.getPhysicalMin().y + closestPlanet.getPhysicalMax().y) / 2);
+
             float[] finalPos;
             if (pTheta > Math.PI * .75) {
                 // top
@@ -104,10 +107,11 @@ public class PlanetTeleportHandler {
                     finalPos = new float[]{(float) relativePos.x / planetRadius, -(float) relativePos.y / planetRadius};
                 }
             }
-
+            if (!level.getWorldBorder().isWithinBounds(playerPos))
+                finalPos = new float[] {0f, 0f};
             player.teleportTo(
                     newLevel,
-                    finalPos[0] * levelRadius, newLevel.getHeight(), finalPos[1] * levelRadius,
+                    finalPos[0] * levelRadius + levelCenter.x, newLevel.getHeight(), finalPos[1] * levelRadius + levelCenter.z,
                     Set.of(),
                     0, 0
             );

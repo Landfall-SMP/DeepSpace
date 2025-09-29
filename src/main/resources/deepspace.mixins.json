@@ -6,7 +6,6 @@
   "refmap": "deepspace.mixins.refmap.json",
   "mixins": [
     "MixinAirCurrent",
-    "MixinAllFanProcessingTypes",
     "MixinDepotBehavior",
     "MixinGameRenderer",
     "MixinSodiumOptionsGUI"
