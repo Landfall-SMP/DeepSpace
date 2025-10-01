@@ -5,12 +5,8 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "deepspace.mixins.refmap.json",
   "mixins": [
-    "MixinGameRenderer",
-    "MixinSodiumOptionsGUI"
-  ],
-  "client": [
-    "MixinGameRenderer",
-    "MixinSodiumOptionsGUI"
+    "MixinAirCurrent",
+    "MixinDepotBehavior"
   ],
   "injectors": {
     "defaultRequire": 1
