@@ -9,7 +9,6 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper;
 import net.createmod.catnip.math.VecHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Containers;
@@ -53,8 +52,8 @@ public abstract class MixinDepotBehavior extends BlockEntityBehaviour {
     @Inject(at = @At("HEAD"), method = "tick()V")
     public void tick(CallbackInfo ci) {
         if (heldItem != null && heldItem.processedBy instanceof CreateIntegration.AerateType) {
-
-            if (Minecraft.getInstance().level.getBlockTicks().count() % 8 == 0) {
+            Level world = blockEntity.getLevel();
+            if (world.getBlockTicks().count() % 8 == 0) {
                 var component = heldItem.stack.getComponents().get(JetHelmetItem.JetHelmetComponent.SUPPLIER.get());
                 if (component != null && component.maxOxygen() >= 0 && component.currentOxygen() < component.maxOxygen()) {
                     heldItem.stack.set(JetHelmetItem.JetHelmetComponent.SUPPLIER, new JetHelmetItem.JetHelmetComponent(component.currentOxygen()+1, component.maxOxygen()));
