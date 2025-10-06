@@ -4,14 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
-import net.minecraft.world.level.levelgen.structure.templatesystem.GravityProcessor;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
-public class SpaceDimensionEffects extends DimensionSpecialEffects {
-    public SpaceDimensionEffects() {
-        super(0, false, SkyType.NONE, false, true);
+public class SarrionDimensionEffects extends DimensionSpecialEffects {
+    public SarrionDimensionEffects() {
+        super(-200, false, SkyType.NONE, false, false);
     }
 
     @Override
@@ -35,5 +34,4 @@ public class SpaceDimensionEffects extends DimensionSpecialEffects {
         return false;
 
     }
-
 }
