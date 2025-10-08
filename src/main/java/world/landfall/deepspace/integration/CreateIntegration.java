@@ -51,7 +51,7 @@ public class CreateIntegration {
         }
     }
     public static void register(IEventBus eventBus) {
-
+        
 
         //FanProcessingTypeRegistry.init();
     }
