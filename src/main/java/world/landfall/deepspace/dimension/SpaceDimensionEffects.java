@@ -11,7 +11,7 @@ import org.joml.Matrix4f;
 
 public class SpaceDimensionEffects extends DimensionSpecialEffects {
     public SpaceDimensionEffects() {
-        super(0, false, SkyType.NONE, false, true);
+        super(-200, false, SkyType.NONE, false, true);
     }
 
     @Override

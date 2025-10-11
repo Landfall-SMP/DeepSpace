@@ -65,7 +65,6 @@ public class Deepspace {
             LOGGER.error("Failed to register space dimension", e);
             throw new RuntimeException("Failed to initialize mod", e);
         }
-
         // Register the Deferred Register to the mod event bus so blocks get registered
         ModBlocks.register(modEventBus);
         // Register the Deferred Register to the mod event bus so items get registered

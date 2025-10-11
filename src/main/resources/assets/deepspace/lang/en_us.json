@@ -17,5 +17,6 @@
   "menu.deepspace.creative_mode_tab": "Deepspace",
   "item.deepspace.jetpack.creative": "Creative Jetpack",
   "item.deepspace.jet_helmet.creative": "Creative Jet Helmet",
-  "item.deepspace.jet_helmet.jei": "Jet helmets can be aired up using a fan from Create."
+  "item.deepspace.jet_helmet.jei": "Jet helmets can be aired up using a fan from Create.",
+  "deepspace.hurt.no_air": "%s succumbed to the cold grasp of space."
 }

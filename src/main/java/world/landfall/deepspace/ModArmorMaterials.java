@@ -34,7 +34,7 @@ public class ModArmorMaterials {
                                     ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"jet")
                             )
                     ),
-                    0,
+                    1000000000,
                     0
             )
     );

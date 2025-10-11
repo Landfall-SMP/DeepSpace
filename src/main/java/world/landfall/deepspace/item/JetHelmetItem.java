@@ -18,6 +18,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -40,7 +41,7 @@ import java.util.function.Supplier;
 public class JetHelmetItem extends ArmorItem {
     public JetHelmetItem() {
         super(ModArmorMaterials.JET_ARMOR_MATERIAL, Type.HELMET,new Properties()
-                .durability(-1)
+                .durability(Integer.MAX_VALUE)
                 .component(JetHelmetComponent.SUPPLIER, new JetHelmetComponent(100, 100))
                 .component(DataComponents.RARITY, Rarity.EPIC)
                 .component(DataComponents.CUSTOM_DATA, CustomData.of(
@@ -50,6 +51,7 @@ public class JetHelmetItem extends ArmorItem {
 
     }
     private static CompoundTag createModTag() {
+
         var createTag = new CompoundTag();
         var data = new CompoundTag();
         data.put("Processing", StringTag.valueOf("BLASTING"));
@@ -73,6 +75,21 @@ public class JetHelmetItem extends ArmorItem {
     }
 
     @Override
+    public boolean isDamaged(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean isDamageable(ItemStack stack) {
+        return false;
+    }
+
+    @Override
+    public boolean canBeHurtBy(ItemStack stack, DamageSource source) {
+        return false;
+    }
+
+    @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
 
@@ -81,7 +98,7 @@ public class JetHelmetItem extends ArmorItem {
             var tick = player.tickCount;
             var component = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
             if (component == null) return;
-            if (tick % 40 == 0 && component.maxOxygen >= 0) {
+            if (tick % 40 == 0 && component.maxOxygen >= 0 && component.currentOxygen > 0) {
                 stack.set(JetHelmetComponent.SUPPLIER, new JetHelmetComponent(component.currentOxygen - 1, component.maxOxygen));
             }
         }

@@ -45,7 +45,7 @@ public class JetpackItem extends Item implements Equipable {
     private static Logger LOGGER = LogUtils.getLogger();
     public JetpackItem() {
         super(new Properties()
-                .durability(-1)
+                .durability(Integer.MAX_VALUE)
                 .component(JetpackComponent.SUPPLIER, new JetpackComponent(100, 100))
                 .component(DataComponents.RARITY, Rarity.EPIC)
         );
