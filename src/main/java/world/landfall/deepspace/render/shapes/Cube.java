@@ -13,8 +13,9 @@ import java.util.LinkedList;
 public class Cube implements DeepSpaceRenderable {
     private static final Logger LOGGER = LogUtils.getLogger();
     private LinkedList<Triangle> TRIANGLES = new LinkedList<>();
-    private final Vector3f center;
+    public final Vector3f center;
     private final boolean weirdNormals;
+    public final float radius;
     public Cube(Vector3f _corner1, Vector3f _corner2, float scale, boolean weirdNormals) {
         this.weirdNormals = weirdNormals;
         var corner1 = new Vector3f(
@@ -32,6 +33,7 @@ public class Cube implements DeepSpaceRenderable {
         Vector3f center = new Vector3f(corner1).add(corner2).div(2);
         this.center = center;
         Vector3f diff = new Vector3f(corner1).sub(corner2).div(2);
+        radius = Math.abs(diff.minComponent());
         Quaternionf[] rotations = new Quaternionf[] {
                 new Quaternionf(),
                 new Quaternionf().rotateLocalY((float)Math.PI/2),

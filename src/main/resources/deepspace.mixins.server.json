@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "deepspace.mixins.refmap.json",
   "mixins": [
-    "MixinAirCurrent",
-    "MixinDepotBehavior"
+    "MixinAirCurrent"
   ],
   "injectors": {
     "defaultRequire": 1

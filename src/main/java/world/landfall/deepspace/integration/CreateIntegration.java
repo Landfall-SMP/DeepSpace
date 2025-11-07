@@ -33,7 +33,9 @@ import java.util.List;
 public class CreateIntegration {
     public static void handleAir(List<Entity> entities, List<Pair<TransportedItemStackHandlerBehaviour, FanProcessingType>> handlers) {
         for (var x : handlers) {
-            var stack = x.getLeft().blockEntity.getBehaviour(DepotBehaviour.TYPE).itemHandler.getStackInSlot(0);
+            var behavior = x.getLeft().blockEntity.getBehaviour(DepotBehaviour.TYPE);
+            if (behavior == null) continue;
+            var stack = behavior.itemHandler.getStackInSlot(0);
             if (stack.is(ModItems.JET_HELMET_ITEM)) {
                 var data = stack.get(JetHelmetItem.JetHelmetComponent.SUPPLIER);
                 if (data == null) continue;

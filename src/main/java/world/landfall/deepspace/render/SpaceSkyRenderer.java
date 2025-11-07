@@ -64,15 +64,24 @@ public class SpaceSkyRenderer {
     ) {
         BufferBuilder builder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
         var instance = Minecraft.getInstance();
-        if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
+//        if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
+//            return;
+        var dim = instance.level.dimension().location();
+        if (dim.equals(ResourceLocation.parse("minecraft:overworld")))
             return;
-
+        var in_sarrion = dim.equals(ResourceLocation.parse("deepspace:sarrion"));
         RenderType renderType = skyShaderType(SPACE_SKY_TEXTURE);
         var poseStack = matrixStack.toPoseStack();
         poseStack.pushPose();
         skySphere.render(poseStack, builder, new Vector3f(), new Quaternionf());
         IrisIntegration.bindPipeline();
+        RenderSystem.setShaderColor(0f, 0f, 0f, 0f);
+        if (in_sarrion)
+            RenderSystem.setShaderColor(.4f, .1f, .1f, 1f);
         renderType.draw(builder.buildOrThrow());
+
+
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         //VeilRenderType.endGateway().draw(builder.buildOrThrow());
         bufferSource.endBatch(renderType);
         poseStack.popPose();

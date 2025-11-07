@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.ModOptions;
@@ -100,13 +101,24 @@ public class SunRenderer {
             Frustum frustum
     ) {
         var instance = Minecraft.getInstance();
-        if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
+//        if (!instance.level.dimension().location().equals(ResourceLocation.fromNamespaceAndPath(Deepspace.MODID,"space")))
+//            return;
+
+        var dim = instance.level.dimension().location();
+        if (dim.equals(ResourceLocation.parse("minecraft:overworld")))
             return;
+        var in_sarrion = dim.equals(ResourceLocation.parse("deepspace:sarrion"));
 
         RenderType sunRenderType = sunRenderType();
         var poseStack = matrixStack.toPoseStack();
         BufferBuilder sunBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
-        MESH.render(poseStack, sunBuilder, camera.getPosition().toVector3f().mul(-1), new Quaternionf());
+        var time = instance.level.getTimeOfDay(partialTicks.getGameTimeDeltaTicks());
+        var x = (float)Math.cos(time * 2 * 3.14159f);
+        var y = (float)Math.sin(time * 2 * 3.14159f);
+        var pos = in_sarrion ?
+            new Vector3f(-1500f * y, 1500f * x, 300f * y).sub(MESH.center).sub(new Vector3f(MESH.radius)):
+            camera.getPosition().toVector3f().mul(-1);
+        MESH.render(poseStack, sunBuilder, pos, new Quaternionf());
         VeilRenderSystem.setShader(Deepspace.path("sun"));
         RenderSystem.setShaderTexture(0, TEXTURE);
         var overloadedColor = 2f;
