@@ -33,7 +33,7 @@ public class Cube implements DeepSpaceRenderable {
         Vector3f center = new Vector3f(corner1).add(corner2).div(2);
         this.center = center;
         Vector3f diff = new Vector3f(corner1).sub(corner2).div(2);
-        radius = Math.abs(diff.minComponent());
+        this.radius = Math.abs(diff.x);
         Quaternionf[] rotations = new Quaternionf[] {
                 new Quaternionf(),
                 new Quaternionf().rotateLocalY((float)Math.PI/2),

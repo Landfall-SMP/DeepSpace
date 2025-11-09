@@ -48,6 +48,7 @@ public class JetpackItem extends Item implements Equipable {
                 .durability(Integer.MAX_VALUE)
                 .component(JetpackComponent.SUPPLIER, new JetpackComponent(100, 100))
                 .component(DataComponents.RARITY, Rarity.EPIC)
+
         );
     }
 
@@ -157,4 +158,5 @@ public class JetpackItem extends Item implements Equipable {
     public static void fallFlyEvent(PlayerFlyableFallEvent event) {
 
     }
+
 }

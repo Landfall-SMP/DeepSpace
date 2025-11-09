@@ -116,7 +116,7 @@ public class SunRenderer {
         var x = (float)Math.cos(time * 2 * 3.14159f);
         var y = (float)Math.sin(time * 2 * 3.14159f);
         var pos = in_sarrion ?
-            new Vector3f(-1500f * y, 1500f * x, 300f * y).sub(MESH.center).sub(new Vector3f(MESH.radius)):
+            new Vector3f(-1500f * y, 1500f * x, 300f * y).sub(MESH.center).add(new Vector3f(0, -MESH.radius, 0)):
             camera.getPosition().toVector3f().mul(-1);
         MESH.render(poseStack, sunBuilder, pos, new Quaternionf());
         VeilRenderSystem.setShader(Deepspace.path("sun"));

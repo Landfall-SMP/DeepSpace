@@ -64,6 +64,7 @@ public class PlanetRenderer {
     public static RenderType planetUnshadedRenderType() {
         var renderType = RenderType.CompositeState.builder()
                 .setShaderState(PLANET_UNSHADED_RENDER_TYPE)
+                .setCullState(RenderStateShard.CullStateShard.NO_CULL)
                 .createCompositeState(true);
         return RenderType.create(
                 "planet_unshaded",
