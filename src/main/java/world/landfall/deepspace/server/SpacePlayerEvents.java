@@ -14,7 +14,11 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.pathfinder.FlyNodeEvaluator;
+import net.minecraft.world.level.pathfinder.NodeEvaluator;
+import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -117,12 +121,13 @@ public class SpacePlayerEvents {
         private static void jetHelmetTick(Player player, Level level, ItemStack jetHelmet, boolean noGravity) {
             var hasJetHelmet = jetHelmet.is(ModItems.JET_HELMET_ITEM.get());
             var component = jetHelmet.getComponents().get(JetHelmetItem.JetHelmetComponent.SUPPLIER.get());
+            var isOxygenated = player.hasData(ModAttatchments.LAST_OXYGENATED) && player.getData(ModAttatchments.LAST_OXYGENATED) < 3;
             var tick = player.tickCount;
-            if (component != null && noGravity && !player.isCreative()) {
+            if (component != null && noGravity && !player.isCreative() && !isOxygenated) {
                 player.setAirSupply(component.playerOxygen());
                 if (component.playerOxygen() < 1 && tick % 10 == 0)
                     player.hurt(ModDamageTypes.noAirDamage(player), 1);
-            } else if (!hasJetHelmet && noGravity) {
+            } else if (!hasJetHelmet && noGravity && !isOxygenated) {
                 player.setAirSupply(0);
                 if (tick % 10 == 0)
                     player.hurt(ModDamageTypes.noAirDamage(player), 2);
@@ -130,6 +135,12 @@ public class SpacePlayerEvents {
 
             }
         }
+        private static void airTick(Player player, Level level, boolean noGravity) {
+            if (!noGravity) return;
+            var ticks = player.tickCount;
+            if (ticks % 20 != 0) return;
+        }
+
         @SubscribeEvent
         public static void playerTick(PlayerTickEvent.Post event) {
 
@@ -145,6 +156,9 @@ public class SpacePlayerEvents {
             var jetHelmetSlot = player.getItemBySlot(EquipmentSlot.HEAD);
             jetpackTick(player, player.level(), jetpackSlot, noGravity);
             jetHelmetTick(player, player.level(), jetHelmetSlot, noGravity);
+            airTick(player, player.level(), noGravity);
+            var lastOxygenated = player.getData(ModAttatchments.LAST_OXYGENATED);
+            player.setData(ModAttatchments.LAST_OXYGENATED, lastOxygenated + .05f);
         }
         private static float angle(float x, float y) {
             var rot = (float)Math.atan(y/x) / ((float)Math.PI*2) * 360;
@@ -164,6 +178,7 @@ public class SpacePlayerEvents {
             var player = event.getEntity();
             player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
             player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
+            player.setData(ModAttatchments.LAST_OXYGENATED, 0f);
         }
     }
 }

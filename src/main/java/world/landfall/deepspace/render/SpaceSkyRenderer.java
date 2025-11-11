@@ -41,6 +41,8 @@ public class SpaceSkyRenderer {
         var renderType = RenderType.CompositeState.builder()
                 .setShaderState(SPACE_SKY_RENDER_TYPE)
                 .setTextureState(new RenderStateShard.TextureStateShard(texture,false,false))
+                .setCullState(RenderStateShard.NO_CULL)
+                .setLayeringState(RenderStateShard.LayeringStateShard.VIEW_OFFSET_Z_LAYERING)
                 .createCompositeState(true);
         return RenderType.create(
                 "space_sky",
