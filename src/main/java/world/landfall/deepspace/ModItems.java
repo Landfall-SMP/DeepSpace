@@ -6,10 +6,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.entity.player.PlayerFlyableFallEvent;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import world.landfall.deepspace.item.AngelBlockItem;
-import world.landfall.deepspace.item.JetHelmetItem;
-import world.landfall.deepspace.item.JetpackItem;
-import world.landfall.deepspace.item.RocketBoosterItem;
+import world.landfall.deepspace.item.*;
 
 import java.util.function.Supplier;
 
@@ -17,6 +14,7 @@ public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(Deepspace.MODID);
     public static final DeferredItem<Item> ANGEL_BLOCK_ITEM = ITEMS.register("angel_block", () -> new AngelBlockItem(new Item.Properties()));
     public static final DeferredItem<JetpackItem> JETPACK_ITEM = ITEMS.register("jetpack", JetpackItem::new);
+    public static final DeferredItem<Item> OXYGENATOR_BLOCK_ITEM = ITEMS.register("oxygenator", OxygenatorBlockItem::new);
     public static final Supplier<ItemStack> CREATIVE_JETPACK_ITEM = () -> {
         var item = JETPACK_ITEM.toStack();
         item.set(JetpackItem.JetpackComponent.SUPPLIER, new JetpackItem.JetpackComponent(100, -1));
