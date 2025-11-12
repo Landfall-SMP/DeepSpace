@@ -98,6 +98,7 @@ public class Cube implements DeepSpaceRenderable {
             for (int i = 0; i < 3; i++) {
                 var oldVertex = triangle.vertexes[i];
                 var vertex = new Vector3f(oldVertex.x, oldVertex.y, oldVertex.z);
+                vertex.add(dimensions);
                 vertex.rotate(rotation);
 
                 var UV = triangle.UV[i];
@@ -106,7 +107,7 @@ public class Cube implements DeepSpaceRenderable {
                     normal = new Vector3f(vertex).sub(center).normalize();
                 else
                     normal = triangle.normals[i];
-                consumer.addVertex(vertex.x+dimensions.x(), vertex.y+dimensions.y(), vertex.z+dimensions.z(),
+                consumer.addVertex(vertex.x, vertex.y, vertex.z,
                         Color.WHITE.argb(),
                         UV.x, UV.y,
                         0, 255, normal.x, normal.y, normal.z

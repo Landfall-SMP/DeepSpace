@@ -1,8 +1,16 @@
 package world.landfall.deepspace.block;
 
+import com.simibubi.create.AllBlockEntityTypes;
+import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.content.kinetics.simpleRelays.AbstractSimpleShaftBlock;
+import foundry.veil.api.client.registry.LightTypeRegistry;
+import foundry.veil.api.client.render.VeilRenderSystem;
+import foundry.veil.api.client.render.light.data.PointLightData;
+import foundry.veil.api.client.render.light.renderer.LightRenderHandle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -16,47 +24,67 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
+import world.landfall.deepspace.ModBlockEntities;
 import world.landfall.deepspace.ModBlocks;
 import world.landfall.deepspace.blockentity.OxygenatorBlockEntity;
 
-public class OxygenatorBlock extends Block implements EntityBlock {
-
-    public static final BooleanProperty ACTIVE = BlockStateProperties.ENABLED;
-    public static final IntegerProperty RADIUS = IntegerProperty.create("radius", 5, 30);
+public class OxygenatorBlock extends AbstractSimpleShaftBlock implements EntityBlock {
     public OxygenatorBlock() {
         super(Properties.of());
+
     }
 
     @Override
     public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos blockPos, @NotNull BlockState blockState) {
-        return new OxygenatorBlockEntity(blockPos, blockState);
+        var ent = new OxygenatorBlockEntity(blockPos, blockState);
+        var vPos = blockPos.getCenter();
+//        var hasLightAlready = VeilRenderSystem.renderer().getLightRenderer().getLights(LightTypeRegistry.POINT.get()).stream().anyMatch(light ->
+//                light.getLightData().getPosition().equals(new Vector3d(vPos.x, vPos.y, vPos.z),.5f));
+//
+//        if (!hasLightAlready) { // This is terrible
+//            ent.LIGHT = VeilRenderSystem.renderer().getLightRenderer().addLight(new PointLightData()
+//                    .setRadius(7)
+//                    .setBrightness(5)
+//                    .setPosition(new Vector3d(vPos.x, vPos.y, vPos.z))
+//            );
+//        }
+        return ent;
+    }
+
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+//        var ent = (OxygenatorBlockEntity)level.getBlockEntity(pos);
+//        if (ent != null && ent.LIGHT != null)
+//            ent.LIGHT.free();
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+//        var ent = (OxygenatorBlockEntity)level.getBlockEntity(pos);
+//        if (ent != null && ent.LIGHT != null)
+//            ent.LIGHT.free();
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(ACTIVE, RADIUS);
     }
 
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        return stateDefinition.any().setValue(ACTIVE, true).setValue(RADIUS, 5);
+        return stateDefinition.any()
+                .setValue(BlockStateProperties.WATERLOGGED, false)
+                .setValue(BlockStateProperties.AXIS, context.getNearestLookingDirection().getAxis());
     }
 
     @Override
-    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-
-        return (level1, blockPos, blockState, ent) -> {
-            if (ent instanceof OxygenatorBlockEntity ox_ent)
-                OxygenatorBlockEntity.tick(level, blockPos, blockState, ox_ent);
-        };
-    }
-
-    public static boolean canOxygenate(BlockState state) {
-        if (!state.is(ModBlocks.OXYGENATOR_BLOCK) || !state.hasBlockEntity()) return false;
-
-        return state.getValue(ACTIVE);
+    public BlockEntityType<? extends KineticBlockEntity> getBlockEntityType() {
+        return ModBlockEntities.OXYGENATOR_BLOCK_ENTITY_TYPE.get();
     }
 }

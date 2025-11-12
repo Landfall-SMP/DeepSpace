@@ -62,7 +62,6 @@ public class PlanetDecorationsRenderer {
                             decoration.color()
                     ));
                 else if (decoration.type().equals(Planet.PlanetDecoration.RINGS)) {
-                    System.out.println("Made ring!");
                     RING_MESHES.put(x.getId(), new Ring(
                             new Plane(x.getCenter().toVector3f(), decoration.scale() * (float) Math.abs(x.getBoundingBoxMin().x - x.getBoundingBoxMax().x), new Quaternionf().rotationX((float)Math.PI/2).rotateY((float)Math.PI * .1f)),
                             decoration.scale(),

@@ -33,6 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.ModArmorMaterials;
+import world.landfall.deepspace.ModAttatchments;
 
 import java.awt.*;
 import java.util.List;
@@ -92,9 +93,12 @@ public class JetHelmetItem extends ArmorItem {
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
-
         var equipped = slotId == 39;
-        if (equipped && entity instanceof Player player && !player.isCreative()) {
+        if (equipped &&
+                entity instanceof Player player &&
+                !player.isCreative() && player.level().dimension().location().equals(Deepspace.path("space")) &&
+                player.getData(ModAttatchments.LAST_OXYGENATED) > 3
+        ) {
             var tick = player.tickCount;
             var component = stack.getComponents().get(JetHelmetComponent.SUPPLIER.get());
             if (component == null) return;

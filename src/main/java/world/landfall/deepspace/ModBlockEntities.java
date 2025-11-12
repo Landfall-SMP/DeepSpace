@@ -25,6 +25,6 @@ public class ModBlockEntities {
     }
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(OxygenatorBlockEntity.TYPE, (ctx) -> new OxygenatorBlockEntity.Renderer(ctx));
+        event.registerBlockEntityRenderer(OxygenatorBlockEntity.TYPE, OxygenatorBlockEntity.Renderer::new);
     }
 }

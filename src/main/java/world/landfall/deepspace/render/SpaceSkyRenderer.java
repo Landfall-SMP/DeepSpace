@@ -43,6 +43,7 @@ public class SpaceSkyRenderer {
                 .setTextureState(new RenderStateShard.TextureStateShard(texture,false,false))
                 .setCullState(RenderStateShard.NO_CULL)
                 .setLayeringState(RenderStateShard.LayeringStateShard.VIEW_OFFSET_Z_LAYERING)
+                .setWriteMaskState(RenderStateShard.WriteMaskStateShard.COLOR_WRITE)
                 .createCompositeState(true);
         return RenderType.create(
                 "space_sky",
@@ -75,7 +76,8 @@ public class SpaceSkyRenderer {
         RenderType renderType = skyShaderType(SPACE_SKY_TEXTURE);
         var poseStack = matrixStack.toPoseStack();
         poseStack.pushPose();
-        skySphere.render(poseStack, builder, new Vector3f(), new Quaternionf());
+        skySphere.render(poseStack, builder, new Vector3f(), camera.rotation().invert());
+
         IrisIntegration.bindPipeline();
         RenderSystem.setShaderColor(0f, 0f, 0f, 0f);
         if (in_sarrion)
@@ -91,6 +93,7 @@ public class SpaceSkyRenderer {
     }
     public static void init() {
 
-        SpaceRenderSystem.registerRenderer(SpaceSkyRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS);
+//        SpaceRenderSystem.registerRenderer(SpaceSkyRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS);
+        SpaceRenderSystem.registerRenderer(SpaceSkyRenderer::render, VeilRenderLevelStageEvent.Stage.AFTER_SKY);
     }
 }

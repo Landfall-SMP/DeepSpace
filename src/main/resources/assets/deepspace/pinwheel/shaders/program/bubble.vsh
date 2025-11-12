@@ -62,6 +62,7 @@ uniform mat4 ProjMat;
 uniform vec3 ChunkOffset;
 uniform int FogShape;
 uniform vec3 SunPosition;
+uniform float Time;
 
 out float vertexDistance;
 out vec4 vertexColor;
@@ -75,5 +76,6 @@ void main() {
     float len = length(SunPosition);
     vertexColor = Color * vec4(clamp(dot(normalize(SunPosition - pos), Normal) + .5f + (1.0 / (len * len)), .2f, 2));
     // vertexColor = vec4(SunPosition.xyz, 1); # visualize position
-    texCoord0 = UV0;
+
+    texCoord0 = UV0 + Time / 320;
 }
