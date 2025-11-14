@@ -170,8 +170,13 @@ public class SpacePlayerEvents {
         }
         @SubscribeEvent
         public static void fallEvent(LivingFallEvent event) {
-            if (event.getEntity() instanceof Player player)
-                event.setDistance(player.level().dimension().location().equals(ResourceLocation.parse("deepspace:space")) ? 0f : event.getDistance());
+            ;
+            if (event.getEntity() instanceof Player player) {
+                var dimension = player.level().dimension().location();
+                var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space")) || dimension.equals(ResourceLocation.parse("deepspace:luna"));
+
+                event.setDistance(noGravity ? 0f : event.getDistance());
+            }
         }
         @SubscribeEvent
         public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event) {
