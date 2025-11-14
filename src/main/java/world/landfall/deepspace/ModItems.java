@@ -1,5 +1,6 @@
 package world.landfall.deepspace;
 
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
@@ -15,6 +16,9 @@ public class ModItems {
     public static final DeferredItem<Item> ANGEL_BLOCK_ITEM = ITEMS.register("angel_block", () -> new AngelBlockItem(new Item.Properties()));
     public static final DeferredItem<JetpackItem> JETPACK_ITEM = ITEMS.register("jetpack", JetpackItem::new);
     public static final DeferredItem<Item> OXYGENATOR_BLOCK_ITEM = ITEMS.register("oxygenator", OxygenatorBlockItem::new);
+    public static final DeferredItem<BlockItem> MOONSTONE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.MOON_STONE);
+    public static final DeferredItem<BlockItem> LUNAR_COBBLE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.LUNAR_COBBLE);
+    public static final DeferredItem<BlockItem> LUNAR_SOIL = ITEMS.registerSimpleBlockItem(ModBlocks.LUNAR_SOIL);
     public static final Supplier<ItemStack> CREATIVE_JETPACK_ITEM = () -> {
         var item = JETPACK_ITEM.toStack();
         item.set(JetpackItem.JetpackComponent.SUPPLIER, new JetpackItem.JetpackComponent(100, -1));

@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @EventBusSubscriber(modid = Deepspace.MODID)
@@ -60,15 +61,15 @@ public class PlanetTeleportHandler {
         var planet = PlanetUtils.getPlayerPlanet(player);
         var closestPlanet = PlanetUtils.getNearestPlanet(player.position());
         var dimension = level.dimension().location();
-        var height = level.getHeight();
+        var height = level.getMaxBuildHeight();
 
         if (player.position().y > height + SPACE_DISTANCE_FROM_CEILING && planet != null) {
             LOGGER.info("Teleporting player {} to planet {}", player.getDisplayName().getString(), planet.getName());
             var pos = getSafePlanetExitLocation(planet);
             player.teleportTo(
-                    player.getServer().getLevel(
-                            ResourceKey.create(Registries.DIMENSION,ResourceLocation.parse("deepspace:space"))
-                    ),
+                    Objects.requireNonNull(player.getServer().getLevel(
+                            ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse("deepspace:space"))
+                    )),
                     pos.x,
                     pos.y,
                     pos.z,
