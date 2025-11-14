@@ -94,9 +94,10 @@ public class JetHelmetItem extends ArmorItem {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
         var equipped = slotId == 39;
+        if (!(entity instanceof Player player)) return;
+        var dim = player.level().dimension().location();
         if (equipped &&
-                entity instanceof Player player &&
-                !player.isCreative() && player.level().dimension().location().equals(Deepspace.path("space")) &&
+                !player.isCreative() && (dim.equals(Deepspace.path("space")) || dim.equals(Deepspace.path("luna"))) &&
                 player.getData(ModAttatchments.LAST_OXYGENATED) > 3
         ) {
             var tick = player.tickCount;

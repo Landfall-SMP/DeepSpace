@@ -4,7 +4,11 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.types.Type;
+import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
+import com.simibubi.create.content.kinetics.base.ShaftRenderer;
+import com.simibubi.create.content.kinetics.simpleRelays.CogWheelBlock;
 import foundry.veil.api.client.registry.LightTypeRegistry;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilRenderBridge;
@@ -33,6 +37,7 @@ import net.minecraft.world.level.PathNavigationRegion;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.lighting.LightEventListener;
@@ -110,7 +115,7 @@ public class OxygenatorBlockEntity extends KineticBlockEntity {
 
     }
 
-    public static class Renderer implements BlockEntityRenderer<OxygenatorBlockEntity> {
+    public static class Renderer extends ShaftRenderer<OxygenatorBlockEntity> {
 
 
         public static final ResourceLocation BUBBLE_SHADER_LOC = Deepspace.path("bubble");
@@ -119,8 +124,10 @@ public class OxygenatorBlockEntity extends KineticBlockEntity {
             return VeilRenderBridge.toShaderInstance(shader);
         });
 
-        public Renderer(BlockEntityRendererProvider.Context ctx) {
+        public Renderer(BlockEntityRendererProvider.Context context) {
+            super(context);
         }
+
 
         private static RenderType type(boolean shaderPack) {
 //            return RenderType.SOLID;
@@ -142,29 +149,40 @@ public class OxygenatorBlockEntity extends KineticBlockEntity {
                     "bubble",
                     DefaultVertexFormat.BLOCK,
                     VertexFormat.Mode.TRIANGLES,
-                    786432, true, false,
+                    186432, true, false,
                     shaderPack ? renderTypeShaderPack : renderType
             );
         }
+
+
         @Override
-        public void render(OxygenatorBlockEntity oxygenatorBlockEntity, float v, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int i1) {
+        public void renderSafe(OxygenatorBlockEntity oxygenatorBlockEntity, float v, PoseStack poseStack, MultiBufferSource multiBufferSource, int i, int i1) {
+
             var state = oxygenatorBlockEntity.getBlockState();
             if (!state.is(ModBlocks.OXYGENATOR_BLOCK))
                 return;
             var mesh = new Sphere(oxygenatorBlockEntity.radius, 32, 16);
             var cam = Minecraft.getInstance().gameRenderer.getMainCamera();
             var type = type(IrisIntegration.isShaderPackEnabled());
+            var shaftBuf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
             var buf = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
+//            ShaftRenderer.renderRotatingKineticBlock(oxygenatorBlockEntity, state, poseStack, shaftBuf, i);
             VeilRenderSystem.setShader(Deepspace.path("bubble"));
             var enabled = oxygenatorBlockEntity.enabled;
-            if (!enabled)
-                return;
             var TIME_UNIFORM = VeilRenderSystem.getShader().getOrCreateUniform("Time");
             TIME_UNIFORM.setFloat((oxygenatorBlockEntity.level.getDayTime() + v) / 2f);
+            var fakeShaft = AllBlocks.SHAFT.getDefaultState().setValue(BlockStateProperties.AXIS, state.getValue(BlockStateProperties.AXIS));
+            KineticBlockEntityRenderer.renderRotatingKineticBlock(oxygenatorBlockEntity, fakeShaft, poseStack, shaftBuf, i);
+
+            getRenderType(oxygenatorBlockEntity, fakeShaft).draw(shaftBuf.buildOrThrow());
+            if (!enabled)
+                return;
             RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
             poseStack.pushPose();
             mesh.render(poseStack, buf, oxygenatorBlockEntity.worldPosition.getCenter().toVector3f().sub(cam.getPosition().toVector3f()), new Quaternionf());
             type.draw(buf.buildOrThrow());
+
+//            super.renderSafe(oxygenatorBlockEntity, v, poseStack, multiBufferSource, i, i1);
             poseStack.popPose();
 
 

@@ -146,7 +146,7 @@ public class SpacePlayerEvents {
 
             Player player = event.getEntity();
             var dimension = player.level().dimension().location();
-            var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space"));
+            var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space")) || dimension.equals(ResourceLocation.parse("deepspace:luna"));
             player.setNoGravity(noGravity);
             //player.setIgnoreFallDamageFromCurrentImpulse(noGravity);
             if (noGravity && !player.getAbilities().flying) {

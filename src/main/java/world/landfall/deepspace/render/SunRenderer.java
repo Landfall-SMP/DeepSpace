@@ -107,7 +107,7 @@ public class SunRenderer {
         var dim = instance.level.dimension().location();
         if (dim.equals(ResourceLocation.parse("minecraft:overworld")))
             return;
-        var in_sarrion = dim.equals(ResourceLocation.parse("deepspace:sarrion"));
+        var in_skybox = dim.equals(Deepspace.path("sarrion")) || dim.equals(Deepspace.path("luna"));
 
         RenderType sunRenderType = sunRenderType();
         var poseStack = matrixStack.toPoseStack();
@@ -115,7 +115,7 @@ public class SunRenderer {
         var time = instance.level.getTimeOfDay(partialTicks.getGameTimeDeltaTicks());
         var x = (float)Math.cos(time * 2 * 3.14159f);
         var y = (float)Math.sin(time * 2 * 3.14159f);
-        var pos = in_sarrion ?
+        var pos = in_skybox ?
             new Vector3f(-1500f * y, 1500f * x, 300f * y).sub(MESH.center).add(new Vector3f(0, -MESH.radius, 0)):
             camera.getPosition().toVector3f().mul(-1);
         MESH.render(poseStack, sunBuilder, pos, new Quaternionf());
