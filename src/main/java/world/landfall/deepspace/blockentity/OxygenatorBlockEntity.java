@@ -161,7 +161,7 @@ public class OxygenatorBlockEntity extends KineticBlockEntity {
             var state = oxygenatorBlockEntity.getBlockState();
             if (!state.is(ModBlocks.OXYGENATOR_BLOCK))
                 return;
-            var mesh = new Sphere(oxygenatorBlockEntity.radius, 32, 16);
+            var mesh = new Sphere(oxygenatorBlockEntity.radius, 32, 32);
             var cam = Minecraft.getInstance().gameRenderer.getMainCamera();
             var type = type(IrisIntegration.isShaderPackEnabled());
             var shaftBuf = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
