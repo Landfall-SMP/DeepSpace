@@ -3,6 +3,7 @@ package world.landfall.deepspace.server;
 import foundry.veil.api.quasar.particle.ParticleSystemManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
@@ -27,6 +28,7 @@ import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.ModAttatchments;
@@ -65,11 +67,17 @@ public class SpacePlayerEvents {
                     return;
                 }
                 var lookAngle = player.getLookAngle();
+                var f = Minecraft.getInstance().options.keyUp.isDown() ? 1 : 0;
+                var b = Minecraft.getInstance().options.keyDown.isDown() ? 1 : 0;
+                var l = Minecraft.getInstance().options.keyLeft.isDown() ? 1 : 0;
+                var r = Minecraft.getInstance().options.keyRight.isDown() ? 1 : 0;
+                var moveDir = new Vector3f(f-b, 0, l-r).normalize();
+
                 var deltas = player.getDeltaMovement();
                 Vector3f storedVelocity = player.getData(ModAttatchments.JETPACK_VELOCITY);
 
                 var keyPressed = player.getData(ModAttatchments.IS_ROCKETING_FORWARD);
-                var rocketVelocity = lookAngle.toVector3f().mul(.04f);
+                var rocketVelocity = lookAngle.toVector3f().mul(.04f).rotateY(moveDir.angle(new Vector3f(1, 0, 0)) * ((l - r < 0 ? -1 : 1)));
                 Vector3f newVelocity = new Vector3f(storedVelocity);
                 if (!noGravity) {
                     rocketVelocity.add(new Vector3f(0f, .04f, 0f)).mul(.1f, 2f, .1f);

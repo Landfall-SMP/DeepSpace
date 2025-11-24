@@ -23,7 +23,7 @@ import world.landfall.deepspace.dimension.SpaceDimensionEffects;
 import world.landfall.deepspace.item.JetpackItem;
 import world.landfall.deepspace.network.JetpackPacket;
 
-@EventBusSubscriber(modid = Deepspace.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Deepspace.MODID, value = Dist.CLIENT)
 public class SpaceClientEvents {
     @SubscribeEvent
     public static void registerDimensionEffects(RegisterDimensionSpecialEffectsEvent event) {

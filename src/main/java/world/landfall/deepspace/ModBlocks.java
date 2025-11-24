@@ -9,10 +9,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import world.landfall.deepspace.block.AngelBlock;
-import world.landfall.deepspace.block.LunarSoilBlock;
-import world.landfall.deepspace.block.MoonstoneOreBlock;
-import world.landfall.deepspace.block.OxygenatorBlock;
+import world.landfall.deepspace.block.*;
 
 public class ModBlocks {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(Deepspace.MODID);
@@ -33,7 +30,7 @@ public class ModBlocks {
             .sound(SoundType.STONE)
             .mapColor(MapColor.COLOR_GRAY)
     ));
-    public static final DeferredBlock<Block> MOON_STONE = BLOCKS.register("moonstone", () -> new Block(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<Block> MOON_STONE = BLOCKS.register("moonstone", () -> new Moonstone(BlockBehaviour.Properties.of()
             .strength(4, 3)
             .sound(SoundType.STONE)
             .mapColor(MapColor.COLOR_GRAY)

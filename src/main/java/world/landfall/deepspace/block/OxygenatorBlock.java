@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.CubeVoxelShape;
@@ -37,12 +39,22 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import world.landfall.deepspace.ModBlockEntities;
 import world.landfall.deepspace.ModBlocks;
+import world.landfall.deepspace.ModItems;
 import world.landfall.deepspace.blockentity.OxygenatorBlockEntity;
+
+import java.util.List;
 
 public class OxygenatorBlock extends AbstractSimpleShaftBlock implements EntityBlock {
     public OxygenatorBlock() {
-        super(Properties.of().noOcclusion());
+        super(Properties.of().noOcclusion()
+                .strength(2)
+        );
 
+    }
+
+    @Override
+    protected List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        return List.of(ModItems.OXYGENATOR_BLOCK_ITEM.toStack(1));
     }
 
     @Override
