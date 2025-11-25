@@ -25,6 +25,7 @@ import world.landfall.deepspace.dimension.SpaceDimensionType;
 import world.landfall.deepspace.integration.CreateIntegration;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.render.SpaceRenderSystem;
+import world.landfall.deepspace.worldgen.ModPlacedFeatures;
 
 import java.util.Objects;
 import java.util.function.Supplier;
