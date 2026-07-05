@@ -30,4 +30,5 @@ public class KeplerometerBlock extends Block implements EntityBlock {
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
         return KeplerometerBlockEntity::tick;
     }
+
 }

@@ -5,6 +5,7 @@ import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.utility.CreateLang;
 import dev.ryanhcode.sable.api.physics.handle.RigidBodyHandle;
 import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
 import dev.ryanhcode.sable.companion.SableCompanion;
@@ -48,28 +49,58 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
     public void setLastApogee(float lastApogee) {
         this.lastApogee = lastApogee;
     }
-
+    public float getLastPerigee() { return this.lastPerigee; }
+    public float getLastApogee() { return this.lastApogee; }
 
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
 
         var sublevelAccess = SableCompanion.INSTANCE.getContaining(this);
 
+        var planet = PlanetRegistry.getClosestPlanet(new Vec3(
+                worldPosition.getX(),
+                worldPosition.getY(),
+                worldPosition.getZ()
+        ));
 
-        if (lastPerigee == 0f || sublevelAccess == null) {
-            tooltip.add(Component.literal("Not in orbit!").withStyle(ChatFormatting.RED));
+
+        CreateLang.text("Orbit Stats:")
+                .forGoggles(tooltip);
+        if (lastPerigee == 0f || sublevelAccess == null || planet == null) {
+//            tooltip.add(Component.literal("Not in orbit!").withStyle(ChatFormatting.RED));
+            CreateLang.text("Not in orbit!").style(ChatFormatting.RED)
+                    .forGoggles(tooltip);
             return true;
         }
+        var safeDistance = planet.getBoundingBoxMax().distanceTo(planet.getBoundingBoxMin()) / 2f;
+        var willCrash = lastPerigee <= safeDistance + 20f;
+        CreateLang.text("Minimum Distance:")
+                .style(ChatFormatting.GRAY)
+                .forGoggles(tooltip);
+        CreateLang.text(" " + lastPerigee)
+                .style(willCrash ? ChatFormatting.RED : ChatFormatting.AQUA)
+                .forGoggles(tooltip); // buffer
+        CreateLang.text("Maximum Distance:")
+                .style(ChatFormatting.GRAY)
+                .forGoggles(tooltip);
+        CreateLang.text(" " + lastApogee)
+                .style(willCrash ? ChatFormatting.RED : ChatFormatting.AQUA)
+                .forGoggles(tooltip); // buffer
+        if (willCrash)
+            CreateLang.text("Orbital Trajectory Will Fail!")
+                    .style(ChatFormatting.RED)
+                    .forGoggles(tooltip);
+//
+//        tooltip.add(
+//                Component.literal("Minimum: ").append(
+//                        Component.literal(""+lastPerigee).withStyle(ChatFormatting.AQUA)
+//                )
+//        );tooltip.add(
+//                Component.literal("Maximum: ").append(
+//                        Component.literal(""+lastApogee).withStyle(ChatFormatting.AQUA)
+//                )
+//        );
 
-        tooltip.add(
-                Component.literal("Minimum: ").append(
-                        Component.literal(""+lastPerigee).withStyle(ChatFormatting.AQUA)
-                )
-        );tooltip.add(
-                Component.literal("Maximum: ").append(
-                        Component.literal(""+lastApogee).withStyle(ChatFormatting.AQUA)
-                )
-        );
 
         return true;
     }
@@ -86,8 +117,29 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
             PacketDistributor.sendToServer(new KeplerometerSublevelDataPacket.Serverbound(worldPosition, sublevelAccess.getUniqueId()));
         }
     }
+    public boolean willCrash() {
+
+        var planet = PlanetRegistry.getClosestPlanet(new Vec3(
+                worldPosition.getX(),
+                worldPosition.getY(),
+                worldPosition.getZ()
+        ));
+        var safeDistance = planet.getBoundingBoxMax().distanceTo(planet.getBoundingBoxMin()) / 2f;
+        return lastPerigee <= safeDistance + 20f;
+    }
+    public boolean willEscape() {
+
+        var planet = PlanetRegistry.getClosestPlanet(new Vec3(
+                worldPosition.getX(),
+                worldPosition.getY(),
+                worldPosition.getZ()
+        ));
+        var safeDistance = planet.getBoundingBoxMax().distanceTo(planet.getBoundingBoxMin()) / 2f;
+        return lastPerigee < -1 || lastApogee < -1;
+    }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos blockPos, BlockState blockState, T t) {
         if (t instanceof KeplerometerBlockEntity blockEntity) blockEntity.tick();
     }
+
 }

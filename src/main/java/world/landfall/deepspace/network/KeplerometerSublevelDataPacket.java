@@ -52,7 +52,6 @@ public class KeplerometerSublevelDataPacket {
             );
         }
         public static void handle(@NotNull Serverbound packet, @NotNull IPayloadContext ctx) {
-            LOGGER.info(packet.toString());
             var level = ctx.player().level();
             if (!level.dimension().location().equals(Deepspace.path("space")))
                 return;
@@ -106,7 +105,6 @@ public class KeplerometerSublevelDataPacket {
             );
         }
         public static void handle(@NotNull Clientbound packet, @NotNull IPayloadContext ctx) {
-            LOGGER.info(packet.toString());
             var level = ctx.player().level();
             if (!level.dimension().location().equals(Deepspace.path("space")))
                 return;
