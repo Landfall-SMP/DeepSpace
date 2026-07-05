@@ -14,7 +14,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +30,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Registry for managing planets and their configurations.
@@ -344,6 +344,20 @@ public class PlanetRegistry {
     public static Planet getPlanet(@NotNull String planetId) {
         Objects.requireNonNull(planetId, "Planet ID cannot be null");
         return planets.get(planetId);
+    }
+
+    @Nullable
+    public static Planet getClosestPlanet(@NotNull Vec3 position) {
+        AtomicReference<Float> minDistance = new AtomicReference<>(Float.MAX_VALUE);
+        AtomicReference<Planet> minPlanet = new AtomicReference<>();
+        planets.values().forEach(planet -> {
+            var dist = planet.getCenter().distanceTo(position);
+            if (dist < minDistance.get()) {
+                minDistance.set((float) dist);
+                minPlanet.set(planet);
+            }
+        });
+        return minPlanet.get();
     }
 
     /**

@@ -10,16 +10,21 @@ import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
 import dev.ryanhcode.sable.companion.SableCompanion;
 import dev.ryanhcode.sable.companion.SubLevelAccess;
 import dev.ryanhcode.sable.sublevel.ServerSubLevel;
+import dev.ryanhcode.sable.sublevel.SubLevel;
+import dev.ryanhcode.sable.sublevel.system.SubLevelPhysicsSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.PacketDistributor;
 import world.landfall.deepspace.Deepspace;
 import world.landfall.deepspace.ModBlocks;
 import world.landfall.deepspace.Util;
+import world.landfall.deepspace.network.KeplerometerSublevelDataPacket;
 import world.landfall.deepspace.planet.PlanetRegistry;
 
 import java.util.List;
@@ -35,6 +40,13 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
 
     public KeplerometerBlockEntity(BlockPos pos, BlockState blockState) {
         super(TYPE, pos, blockState);
+    }
+
+    public void setLastPerigee(float lastPerigee) {
+        this.lastPerigee = lastPerigee;
+    }
+    public void setLastApogee(float lastApogee) {
+        this.lastApogee = lastApogee;
     }
 
 
@@ -68,30 +80,14 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
         if (!level.dimension().location().equals(Deepspace.path("space")))
             return;
         var sublevelAccess = SableCompanion.INSTANCE.getContaining(this);
-        if (sublevelAccess instanceof ServerSubLevel sublevel) {
-            var posTemp = sublevel.logicalPose().position();
-            var pos = new Vec3(
-                    posTemp.x,
-                    posTemp.y,
-                    posTemp.z
-            );
-            var planet = PlanetRegistry.getAllPlanets().stream().min((p1, p2) -> {
-                var dist1 = (int) p1.getCenter().distanceTo(pos);
-                var dist2 = (int) p2.getCenter().distanceTo(pos);
-                return Integer.compare(dist1, dist2);
-            }).get();
-            var handle = RigidBodyHandle.of(sublevel);
-            var velocity = handle.getLinearVelocity();
-            var v = new Vec3(
-                    velocity.x(),
-                    velocity.y(),
-                    velocity.z()
-            );
-            float[] results = Util.calculateOrbitData(planet.getCenter(), pos, v,
-                    (float) planet.getBoundingBoxMax().subtract(planet.getBoundingBoxMin()).length()
-            );
-            this.lastPerigee = results[0];
-            this.lastApogee = results[1];
+        if (sublevelAccess == null) return;
+        if (level.getServer() == null) return;
+        if (level.getServer().getTickCount() % 20 == 0) {
+            PacketDistributor.sendToServer(new KeplerometerSublevelDataPacket.Serverbound(worldPosition, sublevelAccess.getUniqueId()));
         }
+    }
+
+    public static <T extends BlockEntity> void tick(Level level, BlockPos blockPos, BlockState blockState, T t) {
+        if (t instanceof KeplerometerBlockEntity blockEntity) blockEntity.tick();
     }
 }

@@ -5,6 +5,7 @@ import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 import world.landfall.deepspace.server.SubLevelEvents;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,6 +22,13 @@ public class Util {
             }
         });
         return isTrackingSublevel.get();
+    }
+    public static Vec3 fromVector3f(Vector3f vector3f) {
+        return new Vec3(
+                vector3f.x,
+                vector3f.y,
+                vector3f.z
+        );
     }
 
     public static float[] calculateOrbitData(Vec3 planet, Vec3 ship, Vec3 velocity, float mass) {
