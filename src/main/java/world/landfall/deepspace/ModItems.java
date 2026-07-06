@@ -21,6 +21,8 @@ public class ModItems {
     public static final DeferredItem<BlockItem> LUNAR_COBBLE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.LUNAR_COBBLE);
     public static final DeferredItem<BlockItem> LUNAR_SOIL = ITEMS.registerSimpleBlockItem(ModBlocks.LUNAR_SOIL);
 
+    public static final DeferredItem<BlockItem> KEPLEROMETER_ITEM = ITEMS.registerItem("keplerometer", KeplerometerBlockItem::new);
+
     public static final DeferredItem<BlockItem> PICKLE_MOSS_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.PICKLE_MOSS_BLOCK);
     public static final DeferredItem<BlockItem> PICKLE_CORE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.PICKLE_CORE_BLOCK);
     public static final DeferredItem<BlockItem> PICKLE_VINE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.PICKLE_VINE_BLOCK);

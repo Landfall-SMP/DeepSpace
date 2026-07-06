@@ -61,17 +61,34 @@ public class KeplerometerSublevelDataPacket {
             if (sublevel == null) return;
             if (!(sublevel instanceof ServerSubLevel serverSubLevel)) return;
             var handle = RigidBodyHandle.of(serverSubLevel);
-            var velocity = handle.getLinearVelocity();
-            var position = sublevel.logicalPose().position();
-            PacketDistributor.sendToPlayer((ServerPlayer) ctx.player(), new Clientbound(packet.blockEntity, packet.sublevel, new Vector3f(
-                    (float) position.x,
-                    (float) position.y,
-                    (float) position.z
-            ), new Vector3f(
-                    (float) velocity.x(),
-                    (float) velocity.y(),
-                    (float) velocity.z()
-            )));
+            var temp_velocity = handle.getLinearVelocity();
+            var temp_position = sublevel.logicalPose().position();
+            var position = new Vector3f(
+                    (float) temp_position.x(),
+                    (float) temp_position.y(),
+                    (float) temp_position.z()
+            );
+            var velocity = new Vector3f(
+                    (float) temp_velocity.x(),
+                    (float) temp_velocity.y(),
+                    (float) temp_velocity.z()
+            );
+            var blockEntity = level.getBlockEntity(packet.blockEntity);
+            if (blockEntity instanceof KeplerometerBlockEntity keplerometerBlockEntity) {
+                var pos = Util.fromVector3f(position);
+                var planet = PlanetRegistry.getClosestPlanet(pos);
+                if (planet == null) return;
+                float[] result = Util.calculateOrbitData(
+                        planet.getCenter(),
+                        pos,
+                        Util.fromVector3f(velocity),
+                        (float) planet.getBoundingBoxMax().distanceTo(planet.getBoundingBoxMin())
+                );
+                keplerometerBlockEntity.setLastPerigee(result[0]);
+                keplerometerBlockEntity.setLastApogee(result[1]);
+            }
+
+            PacketDistributor.sendToPlayer((ServerPlayer) ctx.player(), new Clientbound(packet.blockEntity, packet.sublevel, position, velocity));
         }
 
         @Override

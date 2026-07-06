@@ -15,6 +15,7 @@ import dev.ryanhcode.sable.sublevel.SubLevel;
 import dev.ryanhcode.sable.sublevel.system.SubLevelPhysicsSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,6 +29,7 @@ import world.landfall.deepspace.Util;
 import world.landfall.deepspace.network.KeplerometerSublevelDataPacket;
 import world.landfall.deepspace.planet.PlanetRegistry;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class KeplerometerBlockEntity extends KineticBlockEntity implements IHaveGoggleInformation, IHaveHoveringInformation {
@@ -35,6 +37,8 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
             KeplerometerBlockEntity::new,
             ModBlocks.KEPLEROMETER_BLOCK.get()
     ).build(null);
+
+    private boolean wasLastCrashing = false;
 
     private float lastPerigee = 0f;
     private float lastApogee = 0f;
@@ -72,14 +76,24 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
                     .forGoggles(tooltip);
             return true;
         }
-        var safeDistance = planet.getBoundingBoxMax().distanceTo(planet.getBoundingBoxMin()) / 2f;
-        var willCrash = lastPerigee <= safeDistance + 20f;
+        var willCrash = willCrash();
+        var willEscape = willEscape();
+
         CreateLang.text("Minimum Distance:")
                 .style(ChatFormatting.GRAY)
                 .forGoggles(tooltip);
         CreateLang.text(" " + lastPerigee)
                 .style(willCrash ? ChatFormatting.RED : ChatFormatting.AQUA)
                 .forGoggles(tooltip); // buffer
+        if (willEscape && !willCrash) {
+            CreateLang.text("Maximum Distance:")
+                    .style(ChatFormatting.GRAY)
+                    .forGoggles(tooltip);
+            CreateLang.text(" Will Escape Orbit!")
+                    .style(ChatFormatting.GOLD)
+                    .forGoggles(tooltip);
+            return true;
+        }
         CreateLang.text("Maximum Distance:")
                 .style(ChatFormatting.GRAY)
                 .forGoggles(tooltip);
@@ -105,11 +119,34 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
         return true;
     }
 
+    private void updateNeighbors() {
+        level.updateNeighborsAt(
+                worldPosition,
+                level.getBlockState(worldPosition).getBlock()
+        );
+        Arrays.stream(Direction.values()).forEach(d -> {
+            level.updateNeighborsAt(
+                    worldPosition.relative(d),
+                    level.getBlockState(worldPosition.relative(d)).getBlock()
+            );
+        });
+    }
+
     @Override
     public void tick() {
         super.tick();
         if (!level.dimension().location().equals(Deepspace.path("space")))
             return;
+        if (willCrash() && !wasLastCrashing) {
+            wasLastCrashing = true;
+            updateNeighbors();
+
+        }
+        if (!willCrash() && wasLastCrashing) {
+            wasLastCrashing = false;
+            updateNeighbors();
+
+        }
         var sublevelAccess = SableCompanion.INSTANCE.getContaining(this);
         if (sublevelAccess == null) return;
         if (level.getServer() == null) return;
