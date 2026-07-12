@@ -6,11 +6,13 @@
   "refmap": "deepspace.mixins.refmap.json",
   "mixins": [
     "MixinGameRenderer",
-    "MixinLivingEntity"
+    "MixinLivingEntity",
+    "MixinSubLevelWarper"
   ],
   "client": [
     "MixinGameRenderer",
-    "MixinLivingEntity"
+    "MixinLivingEntity",
+    "MixinSubLevelWarper"
   ],
   "injectors": {
     "defaultRequire": 1

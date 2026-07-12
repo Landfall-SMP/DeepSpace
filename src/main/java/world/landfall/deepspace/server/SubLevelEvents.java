@@ -6,8 +6,11 @@ import dev.ryanhcode.sable.api.SubLevelHelper;
 import dev.ryanhcode.sable.api.physics.handle.RigidBodyHandle;
 import dev.ryanhcode.sable.api.sublevel.ServerSubLevelContainer;
 import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
+import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
@@ -15,10 +18,14 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.joml.Quaterniond;
 import org.joml.Vector3d;
+import org.joml.Vector3dc;
 import org.slf4j.Logger;
 import world.landfall.deepspace.Deepspace;
 import dev.ryanhcode.sable.sublevel.SubLevel;
+import world.landfall.deepspace.Util;
+import world.landfall.deepspace.mixin.MixinSubLevelWarper;
 import world.landfall.deepspace.planet.Planet;
 import world.landfall.deepspace.planet.PlanetRegistry;
 import world.landfall.deepspace.planet.PlanetTeleportHandler;
@@ -33,6 +40,7 @@ public class SubLevelEvents {
     private static final float DistanceScale = 1f;
     private static final int Tickrate = 20;
     private static final float PlanetTeleportOffset = 1.2345f;
+    private static final float PlanetTeleportAddedVelocity = 28f;
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -138,39 +146,6 @@ public class SubLevelEvents {
                             }
 
                         }
-//                        RigidBodyHandle.of(s).addLinearAndAngularVelocity(
-//                                s.latestLinearVelocity.mul(planet.blockScale()), s.latestAngularVelocity
-//                        );
-
-
-//                        container.removeSubLevel(s, SubLevelRemovalReason.REMOVED);
-
-//                        var savedData = s.getPlot().save();
-//                        var newContainer = Objects.requireNonNull(ServerSubLevelContainer.getContainer(server.getLevel(planet.getDimension())));
-//                        var newSublevel = newContainer.allocateNewSubLevel(new Pose3d(
-//                                newPos, new Quaterniond(), new Vector3d(), new Vector3d()
-//                        ));
-//                        ((ServerSubLevel) newSublevel).getPlot().load(savedData);
-
-//                        s.markRemoved();
-                        // TODO dimensional sable
-//                        SubLevelWarper.WarpSubLevel(
-//                                s,
-//                                server.getLevel(planet.getDimension()),
-//                                newPos
-//                        );
-//                        ServerSubLevelContainer sourceContainer = ServerSubLevelContainer.getContainer(s.getLevel());
-//                        ServerSubLevelContainer destinationContainer = ServerSubLevelContainer.getContainer(server.getLevel(planet.getDimension()));
-//                        Collection<SubLevel> subLevels;
-//                        var warpConnected = true;
-//                        if (warpConnected) {
-//                            subLevels = SubLevelHelper.getConnectedChain(s);
-//                        } else {
-//                            subLevels = Set.of(s);
-//                        }
-
-//                        Vector3d center = s.logicalPose().position();
-//                        WarpSubLevels(subLevels, sourceContainer, destinationContainer, center, newPos);
                         SubLevelWarper.WarpSubLevel(s, server.getLevel(planet.getDimension()), newPos);
                         hasBeenMerked.set(true);
 
@@ -198,26 +173,45 @@ public class SubLevelEvents {
 
                     LOGGER.info("Teleporting sublevel to position {} in space, time fraction is {}", exitPos, (float) (level.getGameTime() % ServerLevel.TICKS_PER_DAY) / ServerLevel.TICKS_PER_DAY);
 
-                    Collection<SubLevel> subLevels;
-                    var warpConnected = true;
-                    if (warpConnected) {
-                        subLevels = SubLevelHelper.getConnectedChain(s);
-                    } else {
-                        subLevels = Set.of(s);
-                    }
-//                    WarpSubLevels(subLevels, container, spaceContainer, sPos, new Vector3d(
-//                            exitPos.x,
-//                            exitPos.y,
-//                            exitPos.z
-//                    ));
+                    var oldSubLevels = List.copyOf(spaceContainer.getAllSubLevels());
                     SubLevelWarper.WarpSubLevel(s, server.getLevel(ResourceKey.create(Registries.DIMENSION, Deepspace.path("space"))), new Vector3d(
                             exitPos.x,
                             exitPos.y,
                             exitPos.z
                     ));
+                    var newSubLevels = List.copyOf(spaceContainer.getAllSubLevels());
+                    var diff = new ArrayList<ServerSubLevel>();
+                    for (var x : newSubLevels) {
+                        if (!oldSubLevels.contains(x))
+                            diff.add(x);
+                    }
+
+                    LOGGER.info("Lenghts: {}, {}", oldSubLevels.size(), newSubLevels.size());
+                    Vector3d finalNewPos = exitPos.toVector3f().get(new Vector3d());
+//                    var newSublevelUUID = Util.OLD_TO_NEW.get(s.getUniqueId()).first();
+//                    var newSublevel = (ServerSubLevel) spaceContainer.getSubLevel(newSublevelUUID);
+                    var newSublevel = diff.getFirst();
+                    LOGGER.info("Running delayed velocity addition !");
+                    if (newSublevel == null) {
+                        LOGGER.error("Couldn't find sublevel in new dimension !");
+                        return;
+                    };
+                    var newHandle = RigidBodyHandle.of(newSublevel);
+                    var center = planet.getCenter();
+                    var toPlanet = finalNewPos.sub(
+                            new Vector3d(center.x, center.y, center.z)
+                    ).normalize().mul(PlanetTeleportAddedVelocity).rotateY(Math.PI / 8);
+                    newHandle.addLinearAndAngularVelocity(
+                            toPlanet, new Vector3d(0, 0, 0)
+                    );
+                    var pos = newSublevel.logicalPose().position();
+                    LOGGER.info("Sublevel at: {} {} {}", pos.x, pos.y, pos.z);
+                    LOGGER.info("UUID: {}", newSublevel.getUniqueId());
+
                 }
             });
         });
+        WaitingOnAddedVelocity.tick(server);
 
 
     }
@@ -301,6 +295,35 @@ public class SubLevelEvents {
         return new Vec3(direction.toVector3f()).scale(magnitude);
 
 
+    }
+    private static class WaitingOnAddedVelocity {
+        public static final Set<WaitingOnAddedVelocity> SUBLEVELS_WAITING = new HashSet<>();
+
+        private final int targetRunTick;
+        private final Runnable ref;
+
+        private WaitingOnAddedVelocity(int targetRunTick, Runnable ref) {
+            this.targetRunTick = targetRunTick;
+            this.ref = ref;
+        }
+
+        public static void tick(MinecraftServer server) {
+            var ticks = server.getTickCount();
+            List<WaitingOnAddedVelocity> l = new ArrayList<>();
+            for (var s : SUBLEVELS_WAITING) {
+                if (s.targetRunTick <= ticks)
+                    l.add(s);
+            }
+            for (var s : l) {
+                SUBLEVELS_WAITING.remove(s);
+                s.ref.run();
+
+            }
+
+        }
+        public static void add(int targetRunTick, Runnable ref) {
+            SUBLEVELS_WAITING.add(new WaitingOnAddedVelocity(targetRunTick, ref));
+        }
     }
 
 }

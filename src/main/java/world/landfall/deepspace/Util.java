@@ -1,16 +1,24 @@
 package world.landfall.deepspace;
 
+import dev.egg.DimensionalSable;
 import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
 import dev.ryanhcode.sable.sublevel.ServerSubLevel;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import world.landfall.deepspace.server.SubLevelEvents;
 
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Util {
+    public static final HashMap<UUID, DimensionalSable.Pair<UUID, Vec3i>> OLD_TO_NEW = new HashMap<>();
 
     public static boolean isPlayerBeingTracked(ServerPlayer player, Level level) {
         var sublevelContainer = SubLevelContainer.getContainer(level);
@@ -43,5 +51,17 @@ public class Util {
         var perigee = axis * (1 - eccentricity);
         var apogee = axis * (1 + eccentricity);
         return new float[] {(float) perigee, (float) apogee};
+    }
+
+    public static void delayByTicks(Runnable runnable, int ticks, MinecraftServer server) {
+//        server.execute(() -> {
+//            if (ticks > 1)
+//                delayByTicks(runnable, ticks - 1, server);
+//            else
+//                runnable.run();
+//        });
+
+        server.doRunTask(new TickTask(ticks, runnable));
+
     }
 }
