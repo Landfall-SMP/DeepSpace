@@ -119,7 +119,7 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
         return true;
     }
 
-    private void updateNeighbors() {
+    public void updateNeighbors() {
         level.updateNeighborsAt(
                 worldPosition,
                 level.getBlockState(worldPosition).getBlock()
@@ -152,6 +152,7 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
         if (level.getServer() == null) return;
         if (level.getServer().getTickCount() % 20 == 0) {
             PacketDistributor.sendToServer(new KeplerometerSublevelDataPacket.Serverbound(worldPosition, sublevelAccess.getUniqueId()));
+            updateNeighbors();
         }
     }
     public boolean willCrash() {

@@ -1,22 +1,32 @@
 package world.landfall.deepspace.block;
 
+import net.createmod.catnip.math.VoxelShaper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.CubeVoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import world.landfall.deepspace.ModBlockEntities;
 import world.landfall.deepspace.blockentity.KeplerometerBlockEntity;
 
 public class KeplerometerBlock extends Block implements EntityBlock {
     public KeplerometerBlock(Properties properties) {
-        super(properties);
+        super(properties
+                .destroyTime(2f)
+                .strength(3.5f)
+                .noOcclusion());
     }
 
     @Override
@@ -51,7 +61,29 @@ public class KeplerometerBlock extends Block implements EntityBlock {
     }
 
     @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return Shapes.create(new AABB(0, 0, 0, 1, 10d/16d, 1));
+    }
+
+    @Override
     protected int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction) {
         return getSignal(state, level, pos, direction);
+    }
+
+    @Override
+    public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
+        super.destroy(level, pos, state);
+        var blockEntity = (KeplerometerBlockEntity) level.getBlockEntity(pos);
+        if (blockEntity == null) return;
+        blockEntity.updateNeighbors();
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        super.onRemove(state, level, pos, newState, movedByPiston);
+        var blockEntity = (KeplerometerBlockEntity) level.getBlockEntity(pos);
+        if (blockEntity == null) return;
+        blockEntity.updateNeighbors();
+
     }
 }
