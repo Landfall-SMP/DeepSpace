@@ -92,12 +92,12 @@ public class SpacePlayerEvents {
                     var dist2 = (int) p2.getCenter().distanceTo(player.position());
                     return Integer.compare(dist1, dist2);
                 }).get();
-                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying)
+                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying && !Util.isPlayerBeingTracked(player, player.level()))
                     newVelocity.add(
-                            nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.02f)
+                            nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.008f)
                     );
                 else if (!player.getAbilities().flying)
-                    newVelocity.add(0, -.06f, 0);
+                    newVelocity.add(0, -.01f, 0);
 
                 if (!keyPressed) {
                     newVelocity.mul(.99f);
@@ -161,8 +161,9 @@ public class SpacePlayerEvents {
             var dimension = player.level().dimension().location();
             var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space")) || dimension.equals(ResourceLocation.parse("deepspace:luna"));
             player.setNoGravity(noGravity);
+            var isBeingTracked = Util.isPlayerBeingTracked(player, player.level());
             //player.setIgnoreFallDamageFromCurrentImpulse(noGravity);
-            if (noGravity && !player.getAbilities().flying) {
+            if (noGravity && !player.getAbilities().flying && isBeingTracked) {
                 player.setDeltaMovement(player.getDeltaMovement().add(new Vec3(0, -.01f, 0)));
             }
             var jetpackSlot = player.getItemBySlot(EquipmentSlot.CHEST);
@@ -179,12 +180,10 @@ public class SpacePlayerEvents {
                     var dist2 = (int) p2.getCenter().distanceTo(player.position());
                     return Integer.compare(dist1, dist2);
                 }).get();
-                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying)
+                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying && !isBeingTracked)
                     newVelocity.add(
-                            nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.02f)
+                            nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.008f)
                     );
-                else if (!player.getAbilities().flying)
-                    newVelocity.add(0, -.06f, 0);
                 player.addDeltaMovement(new Vec3(newVelocity));
             }
 

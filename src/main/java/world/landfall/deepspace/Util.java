@@ -2,13 +2,16 @@ package world.landfall.deepspace;
 
 import dev.egg.DimensionalSable;
 import dev.ryanhcode.sable.api.sublevel.SubLevelContainer;
+import dev.ryanhcode.sable.companion.math.BoundingBox3d;
 import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 import org.joml.Vector3f;
 import world.landfall.deepspace.server.SubLevelEvents;
 
@@ -20,14 +23,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Util {
     public static final HashMap<UUID, DimensionalSable.Pair<UUID, Vec3i>> OLD_TO_NEW = new HashMap<>();
 
-    public static boolean isPlayerBeingTracked(ServerPlayer player, Level level) {
+    public static boolean isPlayerBeingTracked(Player player, Level level) {
         var sublevelContainer = SubLevelContainer.getContainer(level);
         var isTrackingSublevel = new AtomicBoolean(false);
         sublevelContainer.getAllSubLevels().forEach(s -> {
-            if (s instanceof ServerSubLevel subLevel) {
-                if (subLevel.getTrackingPlayers().contains(player.getUUID()))
-                    isTrackingSublevel.set(true);
-            }
+            var newBoundingBox = new BoundingBox3d(s.boundingBox()).expand(5);
+            if (newBoundingBox.contains(new Vector3d(
+                    player.position().x,
+                    player.position().y,
+                    player.position().z
+            )))
+                isTrackingSublevel.set(true);
+
         });
         return isTrackingSublevel.get();
     }
