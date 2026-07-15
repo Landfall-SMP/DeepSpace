@@ -155,7 +155,7 @@ public class Cube implements DeepSpaceRenderable {
                 var vertex = new Vector3f(oldVertex.x, oldVertex.y, oldVertex.z);
                 vertex.add(dimensions);
                 vertex.rotate(rotation);
-
+                vertex.mulTransposePosition(stack.last().pose());
                 var UV = triangle.UV[i];
                 Vector3f normal;
                 if (weirdNormals)

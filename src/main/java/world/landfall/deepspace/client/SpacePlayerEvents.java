@@ -72,17 +72,6 @@ public class SpacePlayerEvents {
                 if (!noGravity) {
                     rocketVelocity.add(new Vector3f(0f, .04f, 0f)).mul(.1f, 2f, .1f);
 
-                    if (player instanceof ServerPlayer serverPlayer && Util.isPlayerBeingTracked(serverPlayer, level)) {
-                        var nearest = PlanetRegistry.getAllPlanets().stream().min((p1, p2) -> {
-                            var dist1 = (int) p1.getCenter().distanceTo(player.position());
-                            var dist2 = (int) p2.getCenter().distanceTo(player.position());
-                            return Integer.compare(dist1, dist2);
-                        }).get();
-                        newVelocity.add(
-                                nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.06f)
-                        );
-                    } else
-                        newVelocity.add(0, -.06f, 0);
                 }
                 if (keyPressed) {
                     newVelocity.add(rocketVelocity);
@@ -98,11 +87,22 @@ public class SpacePlayerEvents {
 
                     }
                 }
+                var nearest = PlanetRegistry.getAllPlanets().stream().min((p1, p2) -> {
+                    var dist1 = (int) p1.getCenter().distanceTo(player.position());
+                    var dist2 = (int) p2.getCenter().distanceTo(player.position());
+                    return Integer.compare(dist1, dist2);
+                }).get();
+                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying)
+                    newVelocity.add(
+                            nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.02f)
+                    );
+                else if (!player.getAbilities().flying)
+                    newVelocity.add(0, -.06f, 0);
 
                 if (!keyPressed) {
-                    newVelocity.add(new Vector3f(0, -.01f, 0));
                     newVelocity.mul(.99f);
                 }
+
                 if (newVelocity.length() > 8) newVelocity.mul(.9f);
                 //player.setPos(player.getPosition(0).add(new Vec3(newVelocity.x, newVelocity.y, newVelocity.z)));
                 player.setData(ModAttatchments.JETPACK_VELOCITY, newVelocity);
@@ -172,6 +172,22 @@ public class SpacePlayerEvents {
             airTick(player, player.level(), noGravity);
             var lastOxygenated = player.getData(ModAttatchments.LAST_OXYGENATED);
             player.setData(ModAttatchments.LAST_OXYGENATED, lastOxygenated + .05f);
+            if (dimension.equals(Deepspace.path("space"))) {
+                var newVelocity = new Vector3f();
+                var nearest = PlanetRegistry.getAllPlanets().stream().min((p1, p2) -> {
+                    var dist1 = (int) p1.getCenter().distanceTo(player.position());
+                    var dist2 = (int) p2.getCenter().distanceTo(player.position());
+                    return Integer.compare(dist1, dist2);
+                }).get();
+                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying)
+                    newVelocity.add(
+                            nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.02f)
+                    );
+                else if (!player.getAbilities().flying)
+                    newVelocity.add(0, -.06f, 0);
+                player.addDeltaMovement(new Vec3(newVelocity));
+            }
+
         }
         private static float angle(float x, float y) {
             var rot = (float)Math.atan(y/x) / ((float)Math.PI*2) * 360;
