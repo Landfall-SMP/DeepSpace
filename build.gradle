@@ -154,6 +154,7 @@ dependencies {
     compileOnly "org.lwjgl:lwjgl:3.3.3"
 
     implementation "blank:dimensional_sable:1.0.5"
+    compileOnly "blank:create_submarine:2.2.4"
 
     // Create mod
     implementation("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") {

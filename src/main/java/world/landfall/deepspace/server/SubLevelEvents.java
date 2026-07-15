@@ -49,14 +49,15 @@ public class SubLevelEvents {
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post e) {
         var server = e.getServer();
-        var spaceContainer = Objects.requireNonNull(ServerSubLevelContainer.getContainer(server.getLevel(ResourceKey.create(
+        var spaceContainer = ServerSubLevelContainer.getContainer(server.getLevel(ResourceKey.create(
                 Registries.DIMENSION,
                 Deepspace.path("space")
-        ))));
+        )));
+        if (spaceContainer == null) return;
         var sublevels = spaceContainer.getAllSubLevels();
 
         sublevels.forEach(s -> {
-            if (s != null) {
+            if (s != null && !s.isRemoved()) {
                 var pos = s.logicalPose().position();
 
                 var closestPlanet = PlanetRegistry.getAllPlanets().stream().min((p1, p2) -> {
@@ -69,6 +70,7 @@ public class SubLevelEvents {
                     if (d1 == d2) return 0;
                     return d2 < d1 ? 1 : -1;
                 }).get();
+
                 var handle = RigidBodyHandle.of(s);
                 var delta = calculateGravitationalSpeedDelta(new Vec3(pos.x, pos.y, pos.z), closestPlanet.getCenter(), (float) closestPlanet.getBoundingBoxMax().distanceTo(closestPlanet.getBoundingBoxMin()));
                 handle.addLinearAndAngularVelocity(

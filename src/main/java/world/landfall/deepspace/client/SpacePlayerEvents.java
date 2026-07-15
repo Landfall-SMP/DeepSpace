@@ -12,12 +12,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.joml.Vector3f;
 import world.landfall.deepspace.*;
+import world.landfall.deepspace.integration.DeepSeasIntegration;
 import world.landfall.deepspace.item.JetHelmetItem;
 import world.landfall.deepspace.item.JetpackItem;
 import world.landfall.deepspace.planet.PlanetRegistry;
@@ -146,6 +148,10 @@ public class SpacePlayerEvents {
             if (!noGravity) return;
             var ticks = player.tickCount;
             if (ticks % 20 != 0) return;
+            if (ModList.get().isLoaded("create_submarine")) {
+                if (DeepSeasIntegration.isPlayerOxygenated(player, level))
+                    player.setData(ModAttatchments.LAST_OXYGENATED, 0f);
+            }
         }
 
         @SubscribeEvent
