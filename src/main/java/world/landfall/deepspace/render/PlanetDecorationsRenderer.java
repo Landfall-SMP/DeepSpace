@@ -99,7 +99,10 @@ public class PlanetDecorationsRenderer {
                 .setShaderState(ATMOSPHERE_RENDER_TYPE)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
                 .setCullState(RenderStateShard.CullStateShard.NO_CULL)
-                .setOutputState(RenderStateShard.TRANSLUCENT_TARGET)
+                .setOutputState(RenderStateShard.MAIN_TARGET)
+                .setLayeringState(RenderStateShard.LayeringStateShard.POLYGON_OFFSET_LAYERING)
+                .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                .setWriteMaskState(RenderStateShard.WriteMaskStateShard.COLOR_WRITE)
                 .createCompositeState(true);
         return RenderType.create(
                 "atmosphere",
