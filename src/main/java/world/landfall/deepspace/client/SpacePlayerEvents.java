@@ -147,10 +147,10 @@ public class SpacePlayerEvents {
         private static void airTick(Player player, Level level, boolean noGravity) {
             if (!noGravity) return;
             var ticks = player.tickCount;
-            if (ticks % 20 != 0) return;
+            if (ticks % 5 != 0) return;
             if (ModList.get().isLoaded("create_submarine")) {
                 if (DeepSeasIntegration.isPlayerOxygenated(player, level))
-                    player.setData(ModAttatchments.LAST_OXYGENATED, 0f);
+                    player.setData(ModAttatchments.LAST_OXYGENATED, -1f);
             }
         }
 
