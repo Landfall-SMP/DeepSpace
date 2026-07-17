@@ -14,6 +14,7 @@ import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import dev.ryanhcode.sable.sublevel.SubLevel;
 import dev.ryanhcode.sable.sublevel.system.SubLevelPhysicsSystem;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -149,9 +150,9 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
         }
         var sublevelAccess = SableCompanion.INSTANCE.getContaining(this);
         if (sublevelAccess == null) return;
-        if (level.getServer() == null) return;
-        if (level.getServer().getTickCount() % 20 == 0) {
-            PacketDistributor.sendToServer(new KeplerometerSublevelDataPacket.Serverbound(worldPosition, sublevelAccess.getUniqueId()));
+        if (level.getGameTime() % 20 == 0) {
+            if (level.isClientSide)
+                PacketDistributor.sendToServer(new KeplerometerSublevelDataPacket.Serverbound(worldPosition, sublevelAccess.getUniqueId()));
             updateNeighbors();
         }
     }
