@@ -348,16 +348,18 @@ public class PlanetRegistry {
 
     @Nullable
     public static Planet getClosestPlanet(@NotNull Vec3 position) {
-        AtomicReference<Float> minDistance = new AtomicReference<>(Float.MAX_VALUE);
-        AtomicReference<Planet> minPlanet = new AtomicReference<>();
-        planets.values().forEach(planet -> {
-            var dist = planet.getCenter().distanceTo(position);
-            if (dist < minDistance.get()) {
-                minDistance.set((float) dist);
-                minPlanet.set(planet);
+        synchronized (registryLock) {
+            Planet closest = null;
+            double minDistance = Double.MAX_VALUE;
+            for (Planet planet : planets.values()) {
+                double dist = planet.getCenter().distanceTo(position);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closest = planet;
+                }
             }
-        });
-        return minPlanet.get();
+            return closest;
+        }
     }
 
     /**

@@ -17,12 +17,17 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector3f;
 import world.landfall.deepspace.*;
 import world.landfall.deepspace.integration.DeepSeasIntegration;
 import world.landfall.deepspace.item.JetHelmetItem;
 import world.landfall.deepspace.item.JetpackItem;
+import world.landfall.deepspace.network.JetpackPacket;
+import world.landfall.deepspace.planet.Planet;
 import world.landfall.deepspace.planet.PlanetRegistry;
+
+import java.util.Comparator;
 
 public class SpacePlayerEvents {
     @EventBusSubscriber(modid = Deepspace.MODID, value = Dist.CLIENT)
@@ -45,6 +50,13 @@ public class SpacePlayerEvents {
                 if (noGravity)
                     player.setPose(Pose.FALL_FLYING);
                 if (player.isShiftKeyDown() || player.onGround()) {
+                    // The client just decided we've stopped flying. The shift key path is already
+                    // announced by SpaceClientEvents when the key is pressed, but landing on the
+                    // ground has no other trigger, so the server would still think we're flying.
+                    // Send a BeginFlying(false) for the local player only so the server clears too.
+                    if (player.onGround() && player == Minecraft.getInstance().player) {
+                        PacketDistributor.sendToServer(new JetpackPacket.BeginFlying(false));
+                    }
                     player.setData(ModAttatchments.IS_FLYING_JETPACK, false);
                     player.setData(ModAttatchments.IS_ROCKETING_FORWARD, false);
                     player.setData(ModAttatchments.JETPACK_VELOCITY, new Vector3f());
@@ -87,12 +99,8 @@ public class SpacePlayerEvents {
 
                     }
                 }
-                var nearest = PlanetRegistry.getAllPlanets().stream().min((p1, p2) -> {
-                    var dist1 = (int) p1.getCenter().distanceTo(player.position());
-                    var dist2 = (int) p2.getCenter().distanceTo(player.position());
-                    return Integer.compare(dist1, dist2);
-                }).get();
-                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying && !Util.isPlayerBeingTracked(player, player.level()))
+                Planet nearest = nearestPlanet(player.position());
+                if (nearest != null && nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying && !Util.isPlayerBeingTracked(player, player.level()))
                     newVelocity.add(
                             nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.008f)
                     );
@@ -175,18 +183,19 @@ public class SpacePlayerEvents {
             player.setData(ModAttatchments.LAST_OXYGENATED, lastOxygenated + .05f);
             if (dimension.equals(Deepspace.path("space"))) {
                 var newVelocity = new Vector3f();
-                var nearest = PlanetRegistry.getAllPlanets().stream().min((p1, p2) -> {
-                    var dist1 = (int) p1.getCenter().distanceTo(player.position());
-                    var dist2 = (int) p2.getCenter().distanceTo(player.position());
-                    return Integer.compare(dist1, dist2);
-                }).get();
-                if (nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying && !isBeingTracked)
+                Planet nearest = nearestPlanet(player.position());
+                if (nearest != null && nearest.getCenter().distanceTo(player.position()) < 1000 && !player.getAbilities().flying && !isBeingTracked)
                     newVelocity.add(
                             nearest.getCenter().subtract(player.position()).toVector3f().normalize().mul(0.008f)
                     );
                 player.addDeltaMovement(new Vec3(newVelocity));
             }
 
+        }
+        private static Planet nearestPlanet(Vec3 position) {
+            return PlanetRegistry.getAllPlanets().stream()
+                    .min(Comparator.comparingInt(p -> (int) p.getCenter().distanceTo(position)))
+                    .orElse(null);
         }
         private static float angle(float x, float y) {
             var rot = (float)Math.atan(y/x) / ((float)Math.PI*2) * 360;
@@ -198,7 +207,6 @@ public class SpacePlayerEvents {
         }
         @SubscribeEvent
         public static void fallEvent(LivingFallEvent event) {
-            ;
             if (event.getEntity() instanceof Player player) {
                 var dimension = player.level().dimension().location();
                 var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space")) || dimension.equals(ResourceLocation.parse("deepspace:luna"));

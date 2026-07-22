@@ -163,6 +163,7 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
                 worldPosition.getY(),
                 worldPosition.getZ()
         ));
+        if (planet == null) return false;
         var safeDistance = planet.getBoundingBoxMax().distanceTo(planet.getBoundingBoxMin()) / 2f;
         return lastPerigee <= safeDistance + 20f;
     }
@@ -173,7 +174,7 @@ public class KeplerometerBlockEntity extends KineticBlockEntity implements IHave
                 worldPosition.getY(),
                 worldPosition.getZ()
         ));
-        var safeDistance = planet.getBoundingBoxMax().distanceTo(planet.getBoundingBoxMin()) / 2f;
+        if (planet == null) return false;
         return lastPerigee < -1 || lastApogee < -1;
     }
 

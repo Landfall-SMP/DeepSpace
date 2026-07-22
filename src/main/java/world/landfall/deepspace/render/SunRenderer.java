@@ -39,49 +39,34 @@ public class SunRenderer {
         ShaderProgram shader = VeilRenderSystem.setShader(SUN_SHADER);
         return VeilRenderBridge.toShaderInstance(shader);
     });
+    private static final RenderType SUN_MAIN_TYPE = RenderType.create(
+            "sun",
+            DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+            VertexFormat.Mode.TRIANGLES,
+            786432, true, false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(SUN_RENDER_TYPE)
+                    .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
+                    .createCompositeState(true)
+    );
+    private static final RenderType SUN_BLOOM_INNER_TYPE = RenderType.create(
+            "sun",
+            DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+            VertexFormat.Mode.TRIANGLES,
+            786432, true, false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(SUN_RENDER_TYPE)
+                    .setOutputState(VeilRenderSystem.BLOOM_SHARD)
+                    .createCompositeState(true)
+    );
+    private static final RenderType SUN_LAYERED = VeilRenderType.layered(SUN_MAIN_TYPE);
+    private static final RenderType SUN_BLOOM_LAYERED = VeilRenderType.layered(SUN_MAIN_TYPE, SUN_BLOOM_INNER_TYPE);
+
     private static RenderType sunRenderType() {
-        var sunState = RenderType.CompositeState.builder()
-                .setShaderState(SUN_RENDER_TYPE)
-                .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
-                .createCompositeState(true);
-        var sunRenderType = RenderType.create(
-                "sun",
-                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
-                VertexFormat.Mode.TRIANGLES,
-                786432, true, false,
-                sunState
-        );
-        return VeilRenderType.layered(
-                sunRenderType
-        );
+        return SUN_LAYERED;
     }
     private static RenderType sunBloomRenderType() {
-        var sunState = RenderType.CompositeState.builder()
-                .setShaderState(SUN_RENDER_TYPE)
-                .setOutputState(RenderStateShard.OutputStateShard.MAIN_TARGET)
-                .createCompositeState(true);
-        var sunRenderType = RenderType.create(
-                "sun",
-                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
-                VertexFormat.Mode.TRIANGLES,
-                786432, true, false,
-                sunState
-        );
-        var bloomState = RenderType.CompositeState.builder()
-                .setShaderState(SUN_RENDER_TYPE)
-                .setOutputState(VeilRenderSystem.BLOOM_SHARD)
-                .createCompositeState(true);
-        var bloomRenderType = RenderType.create(
-                "sun",
-                DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
-                VertexFormat.Mode.TRIANGLES,
-                786432, true, false,
-                bloomState
-        );
-        return VeilRenderType.layered(
-                sunRenderType,
-                bloomRenderType
-        );
+        return SUN_BLOOM_LAYERED;
     }
     public static void refreshMeshes() {
         var sun = PlanetRegistry.getSun();
@@ -106,6 +91,10 @@ public class SunRenderer {
 
         var dim = instance.level.dimension().location();
         if (dim.equals(ResourceLocation.parse("minecraft:overworld")))
+            return;
+        // MESH is populated from the sun in planets.json when the sync packet arrives.
+        // No sun defined (or sync not yet delivered) means there is nothing to draw here.
+        if (MESH == null)
             return;
         var in_skybox = dim.equals(Deepspace.path("sarrion")) || dim.equals(Deepspace.path("luna"));
 

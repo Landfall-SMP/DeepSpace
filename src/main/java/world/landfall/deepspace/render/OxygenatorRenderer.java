@@ -47,30 +47,36 @@ public class OxygenatorRenderer {
         ShaderProgram shader = VeilRenderSystem.setShader(BUBBLE_SHADER_LOC);
         return VeilRenderBridge.toShaderInstance(shader);
     });
+    private static final RenderType BUBBLE_TYPE = RenderType.create(
+            "bubble",
+            DefaultVertexFormat.BLOCK,
+            VertexFormat.Mode.TRIANGLES,
+            186432, true, false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(BUBBLE_SHADER_SHARD)
+                    .setCullState(RenderStateShard.CullStateShard.NO_CULL)
+                    .setTransparencyState(RenderStateShard.ADDITIVE_TRANSPARENCY)
+                    .setLayeringState(RenderStateShard.LayeringStateShard.VIEW_OFFSET_Z_LAYERING)
+                    .setWriteMaskState(RenderStateShard.WriteMaskStateShard.COLOR_WRITE)
+                    .createCompositeState(true)
+    );
+    private static final RenderType BUBBLE_TYPE_SHADERPACK = RenderType.create(
+            "bubble",
+            DefaultVertexFormat.BLOCK,
+            VertexFormat.Mode.TRIANGLES,
+            186432, true, false,
+            RenderType.CompositeState.builder()
+                    .setShaderState(BUBBLE_SHADER_SHARD)
+                    .setCullState(RenderStateShard.CullStateShard.NO_CULL)
+                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                    .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                    .setLayeringState(RenderStateShard.LayeringStateShard.VIEW_OFFSET_Z_LAYERING)
+                    .setWriteMaskState(RenderStateShard.WriteMaskStateShard.COLOR_WRITE)
+                    .createCompositeState(true)
+    );
+
     private static RenderType type(boolean shaderPack) {
-//            return RenderType.SOLID;
-        var renderType = RenderType.CompositeState.builder()
-                .setShaderState(BUBBLE_SHADER_SHARD)
-                .setCullState(RenderStateShard.CullStateShard.NO_CULL)
-                .setTransparencyState(RenderStateShard.ADDITIVE_TRANSPARENCY)
-                .setLayeringState(RenderStateShard.LayeringStateShard.VIEW_OFFSET_Z_LAYERING)
-                .setWriteMaskState(RenderStateShard.WriteMaskStateShard.COLOR_WRITE)
-                .createCompositeState(true);
-        var renderTypeShaderPack = RenderType.CompositeState.builder()
-                .setShaderState(BUBBLE_SHADER_SHARD)
-                .setCullState(RenderStateShard.CullStateShard.NO_CULL)
-                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
-                .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
-                .setLayeringState(RenderStateShard.LayeringStateShard.VIEW_OFFSET_Z_LAYERING)
-                .setWriteMaskState(RenderStateShard.WriteMaskStateShard.COLOR_WRITE)
-                .createCompositeState(true);
-        return RenderType.create(
-                "bubble",
-                DefaultVertexFormat.BLOCK,
-                VertexFormat.Mode.TRIANGLES,
-                186432, true, false,
-                shaderPack ? renderTypeShaderPack : renderType
-        );
+        return shaderPack ? BUBBLE_TYPE_SHADERPACK : BUBBLE_TYPE;
     }
     public static void render(
             VeilRenderLevelStageEvent.Stage stage,
@@ -84,11 +90,16 @@ public class OxygenatorRenderer {
             Camera camera,
             Frustum frustum
     ) {
+        var cameraEntity = Minecraft.getInstance().getCameraEntity();
+        if (cameraEntity == null) return;
+
         for (var oxygenatorBlockEntity : ClientOxygenatorTracker.loop()) {
             var state = oxygenatorBlockEntity.getBlockState();
 
             if (!state.is(ModBlocks.OXYGENATOR_BLOCK))
-                return;
+                continue;
+            if (!oxygenatorBlockEntity.isEnabled())
+                continue;
 
             var mesh = new Sphere(oxygenatorBlockEntity.getRadius(), 32, 32);
             var cam = Minecraft.getInstance().gameRenderer.getMainCamera();
@@ -96,24 +107,23 @@ public class OxygenatorRenderer {
             var poseStack = matrixStack.toPoseStack();
             var buf = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
             VeilRenderSystem.setShader(Deepspace.path("bubble"));
-            var enabled = oxygenatorBlockEntity.isEnabled();
             var TIME_UNIFORM = VeilRenderSystem.getShader().getUniform("Time");
 
-            assert Minecraft.getInstance().getCameraEntity() != null;
-            TIME_UNIFORM.setFloat(Minecraft.getInstance().getCameraEntity().tickCount + cam.getPartialTickTime());
-            if (!enabled)
-                return;
+            TIME_UNIFORM.setFloat(cameraEntity.tickCount + cam.getPartialTickTime());
             RenderSystem.setShaderTexture(0, Deepspace.path("textures/atmosphere.png"));
             poseStack.pushPose();
-            SubLevelAccess levelAccess = SableCompanion.INSTANCE.getContaining(oxygenatorBlockEntity.getLevel(), oxygenatorBlockEntity.getBlockPos());
-            if (levelAccess != null) {
-                Pose3dc pose = levelAccess.logicalPose();
-                mesh.render(poseStack, buf, pose.transformPosition(oxygenatorBlockEntity.getBlockPos().getCenter()).toVector3f().sub(cam.getPosition().toVector3f()), new Quaternionf());
-            } else {
-                mesh.render(poseStack, buf, oxygenatorBlockEntity.getBlockPos().getCenter().toVector3f().sub(cam.getPosition().toVector3f()), new Quaternionf());
+            try {
+                SubLevelAccess levelAccess = SableCompanion.INSTANCE.getContaining(oxygenatorBlockEntity.getLevel(), oxygenatorBlockEntity.getBlockPos());
+                if (levelAccess != null) {
+                    Pose3dc pose = levelAccess.logicalPose();
+                    mesh.render(poseStack, buf, pose.transformPosition(oxygenatorBlockEntity.getBlockPos().getCenter()).toVector3f().sub(cam.getPosition().toVector3f()), new Quaternionf());
+                } else {
+                    mesh.render(poseStack, buf, oxygenatorBlockEntity.getBlockPos().getCenter().toVector3f().sub(cam.getPosition().toVector3f()), new Quaternionf());
+                }
+                type.draw(buf.buildOrThrow());
+            } finally {
+                poseStack.popPose();
             }
-            type.draw(buf.buildOrThrow());
-            poseStack.popPose();
         }
     }
     public static void init() {

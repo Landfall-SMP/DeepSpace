@@ -88,19 +88,25 @@ public class OxygenatorBlockEntity extends KineticBlockEntity {
     @Override
     public void onLoad() {
         super.onLoad();
-        ClientOxygenatorTracker.add(this);
+        if (level != null && level.isClientSide) {
+            ClientOxygenatorTracker.add(this);
+        }
     }
 
     @Override
     public void remove() {
         super.remove();
-        ClientOxygenatorTracker.remove(this);
+        if (level != null && level.isClientSide) {
+            ClientOxygenatorTracker.remove(this);
+        }
     }
 
     @Override
     public void destroy() {
         super.destroy();
-        ClientOxygenatorTracker.remove(this);
+        if (level != null && level.isClientSide) {
+            ClientOxygenatorTracker.remove(this);
+        }
     }
 
     @Override
