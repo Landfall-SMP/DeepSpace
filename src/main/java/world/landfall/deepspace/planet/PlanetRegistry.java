@@ -99,8 +99,8 @@ public class PlanetRegistry {
                 planet.getBoundingBoxMax().y,
                 planet.getBoundingBoxMax().z
             };
-            if (planet.getDecorations().isPresent())
-                this.decorations = planet.getDecorations().get();
+            if (!planet.getDecorations().isEmpty())
+                this.decorations = planet.getDecorations();
             else
                 this.decorations = List.of();
             this.description = planet.getDescription();
@@ -229,6 +229,20 @@ public class PlanetRegistry {
                 new Vec2(1000, 1000)
             );
             registerPlanetUnsafe(nether);
+
+            Planet moon = new Planet(
+                    "luna",
+                    "Luna",
+                    ResourceKey.create(Registries.DIMENSION, Deepspace.path("luna")),
+                    new Vec3(2075, 175, -725),
+                    new Vec3(2125, 225, -675),
+                    List.of(new Planet.PlanetDecoration(Planet.PlanetDecoration.ASTEROIDS, 1.05f, Color.WHITE.getRGB())),
+                    "The moon",
+                    new Vec2(-1000, -1000),
+                    new Vec2(1000, 1000)
+
+            );
+            registerPlanetUnsafe(moon);
             sun = new Sun(
                     new Vec3(-200, 0, -200),
                     new Vec3(200, 400, 200),
