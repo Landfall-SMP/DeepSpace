@@ -94,6 +94,14 @@ public class OxygenatorBlockEntity extends KineticBlockEntity {
     }
 
     @Override
+    public void onChunkUnloaded() {
+        super.onChunkUnloaded();
+        if (level != null && level.isClientSide) {
+            ClientOxygenatorTracker.remove(this);
+        }
+    }
+
+    @Override
     public void remove() {
         super.remove();
         if (level != null && level.isClientSide) {
@@ -145,7 +153,7 @@ public class OxygenatorBlockEntity extends KineticBlockEntity {
         if (ticks % 10 != 0)
             return;
         blockEntity.enabled = (Math.abs(blockEntity.speed) >= 4f) && !blockEntity.overStressed;
-        var r = Math.pow(blockEntity.speed * (3f / 4f) / Math.PI, 1f/3f);
+        var r = Math.pow(Math.abs(blockEntity.speed) * (3f / 4f) / Math.PI, 1f/3f);
         blockEntity.radius = Math.clamp(Math.round(Math.abs(r * SPEED_INPUT_MULTIPLIER)), 2, 16);
         level.players().forEach(p -> {
             SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(blockEntity.getLevel(), blockEntity.worldPosition);

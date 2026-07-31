@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
+import dev.ryanhcode.sable.companion.ClientSubLevelAccess;
 import dev.ryanhcode.sable.companion.SableCompanion;
 import dev.ryanhcode.sable.companion.SubLevelAccess;
 import dev.ryanhcode.sable.companion.math.Pose3dc;
@@ -114,8 +115,11 @@ public class OxygenatorRenderer {
             poseStack.pushPose();
             try {
                 SubLevelAccess levelAccess = SableCompanion.INSTANCE.getContaining(oxygenatorBlockEntity.getLevel(), oxygenatorBlockEntity.getBlockPos());
+
                 if (levelAccess != null) {
-                    Pose3dc pose = levelAccess.logicalPose();
+                    Pose3dc pose = levelAccess.lastPose();
+                    if (levelAccess instanceof ClientSubLevelAccess clientSubLevelAccess)
+                        pose = clientSubLevelAccess.renderPose();
                     mesh.render(poseStack, buf, pose.transformPosition(oxygenatorBlockEntity.getBlockPos().getCenter()).toVector3f().sub(cam.getPosition().toVector3f()), new Quaternionf());
                 } else {
                     mesh.render(poseStack, buf, oxygenatorBlockEntity.getBlockPos().getCenter().toVector3f().sub(cam.getPosition().toVector3f()), new Quaternionf());
