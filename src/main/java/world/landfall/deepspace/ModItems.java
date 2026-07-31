@@ -35,6 +35,7 @@ public class ModItems {
     public static final DeferredItem<Item> SILICON_CRYSTAL_ITEM = ITEMS.registerItem("silicon_crystal", Item::new);
     public static final DeferredItem<Item> RAW_SILICON_ITEM = ITEMS.registerItem("raw_silicon", Item::new);
     public static final DeferredItem<BlockItem> MOONSTONE_SILICON_ORE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.MOONSTONE_SILICON_ORE_BLOCK);
+    public static final DeferredItem<BlockItem> MOONSTONE_ZINC_ORE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.MOONSTONE_ZINC_ORE_BLOCK);
 
     public static final Supplier<ItemStack> CREATIVE_JETPACK_ITEM = () -> {
         var item = JETPACK_ITEM.toStack();

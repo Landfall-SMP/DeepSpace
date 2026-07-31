@@ -169,9 +169,10 @@ public class SpacePlayerEvents {
             var dimension = player.level().dimension().location();
             var noGravity = dimension.equals(ResourceLocation.parse("deepspace:space")) || dimension.equals(ResourceLocation.parse("deepspace:luna"));
             player.setNoGravity(noGravity);
+            var moon = dimension.equals(ResourceLocation.parse("deepspace:luna"));
             var isBeingTracked = Util.isPlayerBeingTracked(player, player.level());
             //player.setIgnoreFallDamageFromCurrentImpulse(noGravity);
-            if (noGravity && !player.getAbilities().flying && isBeingTracked) {
+            if (noGravity && !player.getAbilities().flying && (isBeingTracked || moon)) {
                 player.setDeltaMovement(player.getDeltaMovement().add(new Vec3(0, -.01f, 0)));
             }
             var jetpackSlot = player.getItemBySlot(EquipmentSlot.CHEST);
