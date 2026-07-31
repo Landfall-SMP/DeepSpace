@@ -8,9 +8,56 @@
   },
   "argument2": {
     "argument1": {
-      "argument1": "minecraft:overworld/base_3d_noise",
-      "argument2": 0.4,
-      "type": "minecraft:mul"
+      "argument1": {
+        "argument1": {
+          "argument1": "minecraft:overworld/base_3d_noise",
+          "argument2": 0.4,
+          "type": "minecraft:mul"
+        },
+        "argument2": {
+          "type": "minecraft:spline",
+          "spline": {
+            "coordinate": "minecraft:overworld/continents",
+            "points": [
+              {
+                "location": -1,
+                "derivative": 0,
+                "value": 1
+              },
+              {
+                "location": 1,
+                "derivative": 0,
+                "value": 0
+              }
+            ]
+          }
+        },
+        "type": "minecraft:mul"
+      },
+      "argument2": {
+        "type": "minecraft:spline",
+        "spline": {
+          "coordinate": "minecraft:overworld/continents",
+          "points": [
+            {
+              "location": -1,
+              "derivative": 0,
+              "value": -0.3
+            },
+            {
+              "location": 0,
+              "derivative": 0,
+              "value": 0.05
+            },
+            {
+              "location": 1,
+              "derivative": 0,
+              "value": 0.2
+            }
+          ]
+        }
+      },
+      "type": "minecraft:add"
     },
     "argument2": -0.5,
     "type": "minecraft:add"
